@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#2d0a1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymTracker">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Gym Tracker 🌸</title>
 <style>
   /* ── LOCK SCREEN ── */
@@ -1400,6 +1404,16 @@ document.addEventListener('keydown', e => {
   if (e.key >= '0' && e.key <= '9') pinPress(e.key);
   if (e.key === 'Backspace') pinDelete();
 });
+
+// ══════════════════════════════════════════
+// SERVICE WORKER (PWA offline)
+// ══════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/Gymtracker/sw.js', { scope: '/Gymtracker/' })
+      .catch(() => {});
+  });
+}
 
 // ══════════════════════════════════════════
 // INIT
