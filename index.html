@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2d0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gym Tracker 🌸</title>
+<style>
+  /* ── LOCK SCREEN ── */
+  #lockScreen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(160deg, #2d0a1a 0%, #1a0810 50%, #3d0a20 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; padding: 30px;
+  }
+  #lockScreen.hidden { display: none; }
+
+  .lock-deco {
+    font-size: 72px; margin-bottom: 8px;
+    animation: float 3s ease-in-out infinite;
+  }
+  .lock-title {
+    font-size: 26px; font-weight: 800; text-align: center;
+    background: linear-gradient(135deg, #fff 0%, #ffb3d1 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .lock-sub {
+    font-size: 14px; color: #c490a8; margin-bottom: 40px; text-align: center;
+  }
+
+  .pin-dots {
+    display: flex; gap: 14px; margin-bottom: 32px;
+  }
+  .pin-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid #5a1f38; background: transparent;
+    transition: all .2s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(255,107,157,.5); }
+  .pin-dot.shake { animation: shake .3s ease; }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+  }
+
+  .pin-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; max-width: 280px; width: 100%;
+  }
+  .pin-btn {
+    aspect-ratio: 1; border-radius: 50%;
+    background: #2d1020; border: 1px solid #5a1f38;
+    color: #ffe0ee; font-size: 22px; font-weight: 700;
+    cursor: pointer; transition: all .15s; user-select: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px;
+  }
+  .pin-btn:active { background: #c94475; border-color: #ff6b9d;
+    transform: scale(.93); box-shadow: 0 0 16px rgba(255,107,157,.4); }
+  .pin-btn .sub-letters { font-size: 9px; color: #c490a8; font-weight: 400; letter-spacing: 1px; }
+  .pin-del { font-size: 20px; }
+
+  .lock-error {
+    margin-top: 20px; font-size: 13px; color: #ff6b9d;
+    opacity: 0; transition: opacity .2s; text-align: center;
+  }
+  .lock-error.show { opacity: 1; }
+</style>
+<style>
+  :root {
+    --bg: #1a0810;
+    --surface: #2d1020;
+    --surface2: #3d1828;
+    --surface3: #4a1f32;
+    --accent: #ff6b9d;
+    --accent2: #ff9ec4;
+    --accent-dim: rgba(255,107,157,.15);
+    --pink-dark: #c94475;
+    --green: #ff9ec4;
+    --green-real: #7ecba1;
+    --yellow: #ffcce0;
+    --text: #ffe0ee;
+    --text2: #c490a8;
+    --radius: 18px;
+    --shadow: 0 6px 24px rgba(200,40,100,.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    display: flex; border-top: 1px solid #5a1f38;
+    z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+    backdrop-filter: blur(12px);
+  }
+  .nav-btn {
+    flex: 1; padding: 12px 4px 8px;
+    background: none; border: none; color: var(--text2);
+    font-size: 10px; cursor: pointer; transition: color .2s;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn span { font-size: 22px; line-height: 1; }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 0 0 90px; max-width: 600px; margin: 0 auto; }
+  .page.active { display: block; }
+  .page-body { padding: 0 16px; }
+
+  /* ── HOME HERO ── */
+  .home-hero {
+    background: linear-gradient(145deg, #4a0d2a 0%, #2d0a1a 60%, #1a0810 100%);
+    padding: 48px 20px 28px;
+    position: relative; overflow: hidden;
+  }
+  .home-hero::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,157,.25) 0%, transparent 70%);
+  }
+  .home-hero::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -20px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,158,196,.15) 0%, transparent 70%);
+  }
+  .hero-greeting {
+    font-size: 13px; color: var(--accent2); letter-spacing: .5px;
+    margin-bottom: 6px; font-weight: 500;
+  }
+  .hero-title {
+    font-size: 26px; font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #ffb3d1 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1.2; margin-bottom: 6px;
+  }
+  .hero-date { font-size: 13px; color: var(--text2); }
+  .hero-deco {
+    position: absolute; right: 20px; top: 36px;
+    font-size: 52px; opacity: .5; line-height: 1;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* ── STATS ROW ── */
+  .streak-row { display: flex; gap: 10px; margin: 16px 16px 0; }
+  .stat-box {
+    flex: 1; border-radius: 16px;
+    padding: 14px 10px; text-align: center;
+    border: 1px solid #5a1f38; position: relative; overflow: hidden;
+  }
+  .stat-box::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,107,157,.08), transparent);
+  }
+  .stat-box .val { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-box .lbl { font-size: 10px; color: var(--text2); margin-top: 3px; line-height: 1.3; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 11px; font-weight: 700; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin: 22px 0 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, #5a1f38, transparent);
+  }
+
+  /* ── TODAY BANNER ── */
+  .today-banner {
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+    border-radius: var(--radius); padding: 18px 20px;
+    margin: 14px 0; cursor: pointer; position: relative; overflow: hidden;
+    box-shadow: 0 8px 24px rgba(201,68,117,.35);
+  }
+  .today-banner::after {
+    content: ''; position: absolute; right: -20px; top: -20px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+  .today-banner .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    opacity: .8; margin-bottom: 6px;
+  }
+  .today-banner h2 { font-size: 18px; font-weight: 800; }
+  .today-banner p { font-size: 13px; opacity: .85; margin-top: 5px; }
+  .today-banner .arrow {
+    position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+    font-size: 28px;
+  }
+  .rest-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; margin: 14px 0; text-align: center;
+    border: 1px solid #5a1f38;
+  }
+  .rest-card .icon { font-size: 40px; margin-bottom: 8px; }
+  .rest-card h3 { font-size: 16px; font-weight: 700; }
+  .rest-card p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+  /* ── DAY CARDS ── */
+  .day-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border-radius: var(--radius);
+    padding: 13px 16px; margin-bottom: 9px; cursor: pointer;
+    border: 1px solid #5a1f38; transition: all .2s;
+  }
+  .day-card:active { transform: scale(.97); }
+  .day-card.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .day-card.rest { opacity: .55; cursor: default; }
+  .day-card.done { border-color: #7ecba1; }
+  .day-badge {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--surface2), var(--surface3));
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0; border: 1px solid #5a1f38;
+  }
+  .day-card.today .day-badge { background: linear-gradient(135deg, #c94475, #ff6b9d); border-color: transparent; }
+  .day-card.done .day-badge { background: linear-gradient(135deg, #4a8a6a, #7ecba1); border-color: transparent; }
+  .day-info { flex: 1; }
+  .day-info h3 { font-size: 15px; font-weight: 700; }
+  .day-info p { color: var(--text2); font-size: 12px; margin-top: 2px; }
+  .day-info .day-label { font-size: 10px; color: var(--accent2); font-weight: 600; margin-bottom: 2px; }
+  .day-meta { text-align: right; }
+  .day-meta .time { font-size: 11px; color: var(--text2); }
+  .day-meta .check { font-size: 18px; margin-top: 2px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px;
+    border: 1px solid #5a1f38;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: linear-gradient(145deg, #3d1828, #2d1020);
+    padding: 48px 20px 20px; margin-bottom: 4px;
+    border-bottom: 1px solid #5a1f38;
+  }
+  .page-header h1 { font-size: 22px; font-weight: 800; }
+  .page-header p { color: var(--text2); font-size: 13px; margin-top: 4px; }
+
+  /* ── WORKOUT PAGE ── */
+  .workout-hero {
+    background: linear-gradient(145deg, #4a0d2a, #2d0a1a);
+    padding: 48px 20px 24px; position: relative; overflow: hidden;
+  }
+  .workout-hero::before {
+    content: ''; position: absolute; top: -30px; right: -30px;
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,157,.2) 0%, transparent 70%);
+  }
+  .workout-hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .workout-hero .sub { color: var(--text2); font-size: 13px; }
+  .workout-hero .goal-pill {
+    display: inline-block; background: rgba(255,107,157,.15);
+    border: 1px solid rgba(255,107,157,.3); border-radius: 20px;
+    padding: 6px 14px; font-size: 12px; color: var(--accent2); margin-top: 12px;
+  }
+  .workout-hero .deco { position: absolute; right: 20px; top: 40px; font-size: 48px; opacity: .4; }
+  .back-btn {
+    position: absolute; top: 14px; left: 16px;
+    background: rgba(255,107,157,.15); border: none; color: var(--accent2);
+    font-size: 13px; cursor: pointer; padding: 6px 12px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ── EXERCISE CARD ── */
+  .exercise-card {
+    background: var(--surface); border-radius: var(--radius);
+    margin: 0 16px 10px; border: 1px solid #5a1f38; overflow: hidden;
+  }
+  .exercise-header {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+  }
+  .exercise-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, #3d1828, #5a2040);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0; border: 1px solid #6a2a4a;
+  }
+  .exercise-info { flex: 1; }
+  .exercise-info h4 { font-size: 15px; font-weight: 700; }
+  .exercise-info .meta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+  .badge {
+    border-radius: 20px; padding: 3px 9px; font-size: 10px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .badge-pink { background: rgba(255,107,157,.18); color: var(--accent); }
+  .badge-dim  { background: rgba(255,255,255,.06); color: var(--text2); }
+  .badge-green { background: rgba(126,203,161,.15); color: #7ecba1; }
+
+  .exercise-expand { padding: 0 16px 14px; display: none; }
+  .exercise-expand.open { display: block; }
+  .tips-box {
+    background: rgba(255,204,224,.05); border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 10px 12px;
+    font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 12px;
+  }
+
+  /* ── SET LOGGER ── */
+  .set-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .set-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--surface3); display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: var(--text2); flex-shrink: 0;
+  }
+  .set-num.done { background: linear-gradient(135deg, #7ecba1, #4a8a6a); color: #fff; }
+  .set-input {
+    background: var(--bg); border: 1px solid #5a1f38;
+    border-radius: 9px; color: var(--text); padding: 7px 10px;
+    font-size: 14px; width: 68px; text-align: center;
+  }
+  .set-input:focus { outline: none; border-color: var(--accent); }
+  .set-label { font-size: 11px; color: var(--text2); width: 28px; }
+  .set-done-btn {
+    margin-left: auto; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--surface3); border: 1px solid #5a1f38; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    transition: all .2s;
+  }
+  .set-done-btn.done { background: linear-gradient(135deg, #7ecba1, #4a8a6a); border-color: transparent; }
+
+  /* ── WALK CARD ── */
+  .walk-card {
+    background: linear-gradient(135deg, rgba(255,107,157,.07), rgba(255,107,157,.03));
+    border: 1px solid rgba(255,107,157,.2);
+    border-radius: var(--radius); padding: 14px 16px;
+    margin: 0 16px 10px; display: flex; align-items: center; gap: 12px;
+  }
+  .walk-card .wicon { font-size: 28px; }
+  .walk-card .winfo h4 { font-size: 14px; font-weight: 700; color: var(--accent2); }
+  .walk-card .winfo p { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+
+  /* ── COMPLETE BTN ── */
+  .complete-btn {
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+    color: #fff; border: none; padding: 16px;
+    border-radius: 16px; font-size: 16px; font-weight: 800;
+    cursor: pointer; width: calc(100% - 32px); margin: 16px 16px 0;
+    box-shadow: 0 8px 24px rgba(201,68,117,.35);
+    transition: transform .1s;
+  }
+  .complete-btn:active { transform: scale(.97); }
+
+  /* ── TIMER ── */
+  .timer-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20,4,12,.9); z-index: 200;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .timer-overlay.show { display: flex; }
+  .timer-circle {
+    width: 200px; height: 200px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; margin-bottom: 30px; position: relative;
+  }
+  .timer-circle svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .timer-bg { stroke: #3d1828; }
+  .timer-ring { stroke: var(--accent); transition: stroke-dashoffset .9s linear; }
+  .timer-num { font-size: 54px; font-weight: 800; color: var(--text); }
+  .timer-lbl { font-size: 13px; color: var(--text2); }
+  .timer-label { font-size: 16px; color: var(--accent2); margin-bottom: 20px; }
+  .timer-skip {
+    background: var(--surface); border: 1px solid #5a1f38;
+    color: var(--text); padding: 12px 32px; border-radius: 14px;
+    font-size: 15px; cursor: pointer;
+  }
+  .timer-add { background: transparent; border: none; color: var(--text2);
+    padding: 10px 20px; font-size: 13px; cursor: pointer; }
+
+  /* ── DONE OVERLAY ── */
+  .done-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20,4,12,.95); z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center; padding: 30px;
+  }
+  .done-overlay.show { display: flex; }
+  .done-big { font-size: 80px; margin-bottom: 10px; animation: pop .4s ease; }
+  .done-sparks { font-size: 32px; letter-spacing: 6px; margin-bottom: 16px; }
+  .done-overlay h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .done-overlay p { color: var(--text2); margin-bottom: 30px; font-size: 14px; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+  /* ── CALENDAR ── */
+  .calendar-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 14px; border: 1px solid #5a1f38;
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-header h3 { font-size: 15px; font-weight: 700; }
+  .cal-nav { background: none; border: none; color: var(--text2);
+    font-size: 20px; cursor: pointer; padding: 2px 8px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow {
+    text-align: center; font-size: 10px; color: var(--text2);
+    font-weight: 700; padding: 4px 0;
+  }
+  .cal-day {
+    aspect-ratio: 1; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--text2);
+    position: relative; cursor: default;
+  }
+  .cal-day.empty { opacity: 0; }
+  .cal-day.worked {
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+    color: #fff; font-weight: 800;
+  }
+  .cal-day.today-cal {
+    border: 2px solid var(--accent); color: var(--accent);
+  }
+  .cal-day.worked.today-cal { border: 2px solid #fff; }
+  .cal-day .dot {
+    position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
+  }
+  .cal-legend {
+    display: flex; gap: 14px; margin-top: 12px; font-size: 11px;
+    color: var(--text2); justify-content: center;
+  }
+  .cal-legend span { display: flex; align-items: center; gap: 4px; }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 4px;
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+  }
+  .legend-dot.today { background: none; border: 2px solid var(--accent); }
+
+  /* ── HISTORY ITEMS ── */
+  .history-item {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 13px 15px; margin-bottom: 8px;
+    border: 1px solid #5a1f38;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .history-icon { font-size: 26px; flex-shrink: 0; }
+  .history-info { flex: 1; min-width: 0; }
+  .history-info h4 { font-size: 14px; font-weight: 700; }
+  .history-info p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .history-date { font-size: 11px; color: var(--text2); flex-shrink: 0; }
+  .delete-btn {
+    background: rgba(255,107,157,.12); border: 1px solid rgba(255,107,157,.2);
+    color: var(--accent); border-radius: 9px; padding: 6px 10px;
+    font-size: 14px; cursor: pointer; flex-shrink: 0;
+    transition: background .2s;
+  }
+  .delete-btn:active { background: rgba(255,107,157,.3); }
+
+  /* ── PROGRESS CHART ── */
+  .progress-chart { background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px; border: 1px solid #5a1f38; }
+  .chart-title { font-size: 13px; color: var(--text2); margin-bottom: 14px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { width: 100%; border-radius: 6px 6px 0 0;
+    background: linear-gradient(to top, #c94475, #ff9ec4); min-height: 4px; }
+  .bar-val { font-size: 9px; color: var(--text2); }
+  .bar-date { font-size: 9px; color: var(--text2); }
+
+  /* ── EXERCISE SELECT ── */
+  .exercise-select {
+    background: var(--surface); border: 1px solid #5a1f38;
+    color: var(--text); padding: 12px 14px; border-radius: 14px;
+    font-size: 14px; width: 100%; margin-bottom: 16px;
+    appearance: none;
+  }
+
+  /* ── MEASUREMENTS ── */
+  .meas-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .meas-label { flex: 1; font-size: 14px; }
+  .meas-input {
+    background: var(--bg); border: 1px solid #5a1f38;
+    color: var(--text); padding: 9px 12px; border-radius: 12px;
+    font-size: 14px; width: 90px; text-align: center;
+  }
+  .meas-input:focus { outline: none; border-color: var(--accent); }
+  .meas-unit { font-size: 12px; color: var(--text2); width: 28px; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+    color: white; border: none; padding: 14px; border-radius: 14px;
+    font-size: 15px; font-weight: 700; cursor: pointer; width: 100%;
+    transition: opacity .2s; box-shadow: 0 4px 16px rgba(201,68,117,.3);
+  }
+  .btn-primary:active { opacity: .85; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 36px 20px; color: var(--text2); }
+  .empty-state .icon { font-size: 44px; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: #5a1f38; border-radius: 3px; }
+
+  /* ── CONFIRM DIALOG ── */
+  .confirm-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20,4,12,.85); z-index: 400;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .confirm-overlay.show { display: flex; }
+  .confirm-sheet {
+    background: var(--surface2); border-radius: 20px 20px 0 0;
+    padding: 24px 20px 36px; width: 100%; max-width: 600px;
+    border-top: 1px solid #5a1f38;
+  }
+  .confirm-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .confirm-sheet p { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; background: var(--surface); border: 1px solid #5a1f38;
+    color: var(--text); padding: 13px; border-radius: 12px;
+    font-size: 14px; cursor: pointer; font-weight: 600;
+  }
+  .btn-danger {
+    flex: 1; background: linear-gradient(135deg, #c94475, #ff6b9d);
+    border: none; color: #fff; padding: 13px; border-radius: 12px;
+    font-size: 14px; cursor: pointer; font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOCK SCREEN ══════════════════ -->
+<div id="lockScreen">
+  <div class="lock-deco">🔒</div>
+  <div class="lock-title">Gym Tracker</div>
+  <div class="lock-sub">Nhập mã PIN để vào app 🌸</div>
+
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="dot0"></div>
+    <div class="pin-dot" id="dot1"></div>
+  </div>
+
+  <div class="pin-grid">
+    <button class="pin-btn" onclick="pinPress('1')"><span>1</span></button>
+    <button class="pin-btn" onclick="pinPress('2')"><span>2</span><span class="sub-letters">ABC</span></button>
+    <button class="pin-btn" onclick="pinPress('3')"><span>3</span><span class="sub-letters">DEF</span></button>
+    <button class="pin-btn" onclick="pinPress('4')"><span>4</span><span class="sub-letters">GHI</span></button>
+    <button class="pin-btn" onclick="pinPress('5')"><span>5</span><span class="sub-letters">JKL</span></button>
+    <button class="pin-btn" onclick="pinPress('6')"><span>6</span><span class="sub-letters">MNO</span></button>
+    <button class="pin-btn" onclick="pinPress('7')"><span>7</span><span class="sub-letters">PQRS</span></button>
+    <button class="pin-btn" onclick="pinPress('8')"><span>8</span><span class="sub-letters">TUV</span></button>
+    <button class="pin-btn" onclick="pinPress('9')"><span>9</span><span class="sub-letters">WXYZ</span></button>
+    <div></div>
+    <button class="pin-btn" onclick="pinPress('0')"><span>0</span></button>
+    <button class="pin-btn" onclick="pinDelete()"><span class="pin-del">⌫</span></button>
+  </div>
+
+  <div class="lock-error" id="lockError">Sai mã rồi, thử lại nha 🙈</div>
+</div>
+
+<!-- ── REST TIMER ── -->
+<div class="timer-overlay" id="timerOverlay">
+  <div class="timer-label" id="timerExName"></div>
+  <div class="timer-circle">
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <circle class="timer-bg" cx="100" cy="100" r="90" stroke-width="8" fill="none"/>
+      <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90"
+        stroke-width="8" fill="none" stroke-linecap="round"
+        stroke-dasharray="565" stroke-dashoffset="565"/>
+    </svg>
+    <div class="timer-num" id="timerNum">60</div>
+    <div class="timer-lbl">giây nghỉ 💕</div>
+  </div>
+  <button class="timer-skip" onclick="skipTimer()">Bỏ qua ▶</button>
+  <button class="timer-add" onclick="addTime(30)">+30 giây</button>
+</div>
+
+<!-- ── WORKOUT DONE ── -->
+<div class="done-overlay" id="doneOverlay">
+  <div class="done-big">🏆</div>
+  <div class="done-sparks">🌸💪🌸</div>
+  <h2>Hoàn thành rồi!</h2>
+  <p id="doneMsg">Tuyệt vời! Coca giỏi lắm!</p>
+  <button class="btn-primary" style="max-width:300px" onclick="closeDone()">Về trang chính 🏠</button>
+</div>
+
+<!-- ── CONFIRM DELETE ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-sheet">
+    <h3>🗑️ Xoá buổi tập?</h3>
+    <p id="confirmMsg">Bạn có chắc muốn xoá buổi tập này không?</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Huỷ</button>
+      <button class="btn-danger" id="confirmYesBtn">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE: HOME ══════════════════ -->
+<div class="page active" id="page-home">
+  <div class="home-hero">
+    <div class="hero-greeting">✨ Chào buổi sáng!</div>
+    <div class="hero-title">Hellu Coca,<br>tập luyện thui!! 🌸</div>
+    <div class="hero-date" id="homeDate"></div>
+    <div class="hero-deco">🐱</div>
+  </div>
+
+  <div class="streak-row">
+    <div class="stat-box">
+      <div class="val" id="streakVal">0</div>
+      <div class="lbl">🔥 Ngày<br>liên tiếp</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" id="weekWorkouts">0</div>
+      <div class="lbl">🌸 Buổi<br>tuần này</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" id="totalWorkouts">0</div>
+      <div class="lbl">🐾 Tổng<br>buổi tập</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div id="todayBanner"></div>
+    <div class="section-title">Lịch tuần này</div>
+    <div id="weekCards"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE: WORKOUT ══════════════════ -->
+<div class="page" id="page-workout">
+  <div id="workoutHero"><!-- dynamic --></div>
+  <div style="height:12px"></div>
+  <div id="workoutContent"><!-- dynamic --></div>
+</div>
+
+<!-- ══════════════════ PAGE: PROGRESS ══════════════════ -->
+<div class="page" id="page-progress">
+  <div class="page-header">
+    <h1>Tiến độ 📈</h1>
+    <p>Lịch check-in & biểu đồ cân tạ</p>
+  </div>
+  <div class="page-body">
+
+    <!-- Calendar -->
+    <div class="section-title">Lịch check-in</div>
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <h3 id="calTitle"></h3>
+        <button class="cal-nav" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><div class="legend-dot"></div> Đã tập</span>
+        <span><div class="legend-dot today"></div> Hôm nay</span>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="section-title">Biểu đồ cân tạ</div>
+    <select class="exercise-select" id="progressExSelect" onchange="renderProgressChart()">
+      <option value="">— Chọn bài tập —</option>
+    </select>
+    <div id="progressChartArea">
+      <div class="empty-state"><div class="icon">🐶</div><p>Chọn bài tập để xem biểu đồ</p></div>
+    </div>
+
+    <!-- History -->
+    <div class="section-title">Lịch sử buổi tập</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE: MEASUREMENTS ══════════════════ -->
+<div class="page" id="page-meas">
+  <div class="page-header">
+    <h1>Đo lường 📏</h1>
+    <p>Ghi lại số đo cơ thể của Coca</p>
+  </div>
+  <div class="page-body" style="padding-top:16px">
+    <div class="card">
+      <div class="section-title" style="margin-top:0">Số đo hôm nay 🌷</div>
+      <div class="meas-row"><div class="meas-label">🐾 Cân nặng</div>
+        <input class="meas-input" type="number" id="m-weight" placeholder="60" step="0.1">
+        <div class="meas-unit">kg</div></div>
+      <div class="meas-row"><div class="meas-label">🎀 Eo</div>
+        <input class="meas-input" type="number" id="m-waist" placeholder="70" step="0.1">
+        <div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🍑 Hông</div>
+        <input class="meas-input" type="number" id="m-hip" placeholder="90" step="0.1">
+        <div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🌸 Bắp tay</div>
+        <input class="meas-input" type="number" id="m-arm" placeholder="28" step="0.1">
+        <div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🦋 Đùi</div>
+        <input class="meas-input" type="number" id="m-thigh" placeholder="55" step="0.1">
+        <div class="meas-unit">cm</div></div>
+      <button class="btn-primary" style="margin-top:8px" onclick="saveMeasurements()">
+        Lưu số đo 💾
+      </button>
+    </div>
+    <div class="section-title">Lịch sử số đo</div>
+    <div id="measHistory"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ BOTTOM NAV ══════════════════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchPage('home',this)">
+    <span>🌸</span>Trang chủ
+  </button>
+  <button class="nav-btn" onclick="switchPage('progress',this)">
+    <span>🐾</span>Tiến độ
+  </button>
+  <button class="nav-btn" onclick="switchPage('meas',this)">
+    <span>🎀</span>Đo lường
+  </button>
+</nav>
+
+<script>
+// ══════════════════════════════════════════
+// WORKOUT DATA
+// ══════════════════════════════════════════
+const WORKOUT_DAYS = {
+  2: {
+    name:'Thứ 2', title:'Chân & Mông', subtitle:'Glutes Focus',
+    duration:'~70 phút', goal:'Phát triển cơ mông, đùi trước & sau',
+    icon:'🌸', color:'#ff6b9d',
+    exercises:[
+      {name:'Khởi động đi bộ',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Bắt đầu chậm 4 km/h, tăng dần lên 5.5 km/h. Giữ lưng thẳng, đánh tay nhẹ nhàng.'},
+      {name:'Barbell / Goblet Squat',sets:4,reps:'12–15',rest:60,muscle:'Đùi trước, Mông',icon:'🐻',
+       tips:'Chân rộng bằng vai, mũi chân xoay nhẹ ra ngoài 15–30°. Hạ hông xuống như đang ngồi ghế, gối KHÔNG vượt quá mũi chân. Giữ ngực ưỡn.'},
+      {name:'Hip Thrust',sets:4,reps:'12–15',rest:60,muscle:'Cơ mông lớn',icon:'🌺',
+       tips:'Lưng tựa vào ghế ở phần dưới xương bả vai. Đẩy hông lên cao, siết mông tối đa ở đỉnh và giữ 1–2 giây. KHÔNG ưỡn lưng dưới quá mức.'},
+      {name:'Hip Abduction',sets:4,reps:'15–20',rest:45,muscle:'Mông nhỏ (Glute Med)',icon:'🦋',
+       tips:'Cơ mông giữa tạo nên đường cong hông. Đẩy chân ra ngoài chậm và siết mông tối đa. Tránh đung đưa thân người.'},
+      {name:'Leg Press',sets:3,reps:'15',rest:60,muscle:'Đùi trước, Mông',icon:'🐱',
+       tips:'Đặt chân cao trên tấm đẩy sẽ kích thích mông nhiều hơn. Hạ xuống từ từ (3 giây), đẩy lên nhanh hơn (1 giây).'},
+      {name:'Walking Lunge',sets:3,reps:'10 bước/bên',rest:60,muscle:'Đùi trước, Mông',icon:'🌼',
+       tips:'Bước dài, hạ gối sau xuống gần chạm sàn. Giữ thân người thẳng đứng. Dùng tạ nhẹ trước khi tăng nặng.'},
+      {name:'Đi bộ thư giãn',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Giảm tốc độ về 4–4.5 km/h. Thời gian vàng để nhịp tim hạ từ từ, giảm DOMS.'}
+    ]
+  },
+  3: {
+    name:'Thứ 3', title:'Ngực & Vai', subtitle:'Upper Body Push',
+    duration:'~65 phút', goal:'Định hình ngực, vai tròn & đầy',
+    icon:'🌷', color:'#e06090',
+    exercises:[
+      {name:'Khởi động đi bộ',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Vung tay rộng để làm ấm khớp vai trước khi tập push.'},
+      {name:'Dumbbell Bench Press',sets:4,reps:'12–15',rest:60,muscle:'Ngực, Vai trước',icon:'🐰',
+       tips:'Nằm trên ghế, lưng hơi ưỡn tự nhiên. Hạ tạ đến khi cánh tay song song mặt đất. Đẩy tạ lên và chụm lại nhẹ ở trên cùng.'},
+      {name:'Incline Dumbbell Press',sets:3,reps:'12',rest:60,muscle:'Ngực trên, Vai trước',icon:'🌻',
+       tips:'Ghế nghiêng 30–45°. Góc này kích thích ngực trên – phần giúp ngực trông đầy hơn. Giữ vai ép xuống ghế.'},
+      {name:'Dumbbell Shoulder Press',sets:4,reps:'12',rest:60,muscle:'Vai tổng hợp (3 đầu)',icon:'🐶',
+       tips:'Ngồi thẳng lưng, tạ ngang tai, đẩy thẳng lên trên. KHÔNG khóa khuỷu tay ở trên cùng.'},
+      {name:'Lateral Raise (Dumbbell)',sets:4,reps:'15',rest:45,muscle:'Vai giữa',icon:'🌸',
+       tips:'Nâng tạ lên đến ngang vai. Cổ tay THẤP hơn khuỷu tay – đổ nước từ bình tưới. Dùng tạ nhẹ đúng kỹ thuật.'},
+      {name:'Cable Lateral Raise',sets:3,reps:'15/bên',rest:45,muscle:'Vai giữa',icon:'🎀',
+       tips:'Phiên bản đơn tay giúp kích thích vai giữa sâu hơn. Lean nhẹ về phía đối diện để tăng biên độ.'},
+      {name:'Arnold Press',sets:3,reps:'12',rest:60,muscle:'Vai tổng hợp (3 đầu)',icon:'🌺',
+       tips:'Bắt đầu lòng bàn tay vào mặt, xoay ra ngoài khi đẩy lên. Thực hiện chậm và kiểm soát.'},
+      {name:'Đi bộ thư giãn',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'4 km/h, lắc nhẹ tay và xoay vai. Kéo giãn nhẹ ngực bằng cách đan tay sau lưng.'}
+    ]
+  },
+  4: {
+    name:'Thứ 4', title:'Chân & Mông', subtitle:'Isolation Focus',
+    duration:'~65 phút', goal:'Hoàn thiện đường cơ mông, căng cơ đùi',
+    icon:'🦋', color:'#cc6699',
+    exercises:[
+      {name:'Khởi động đi bộ',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Bước dài hơn, nâng gối cao hơn để làm ấm hông và gối.'},
+      {name:'Sumo Squat',sets:4,reps:'15',rest:60,muscle:'Đùi trong, Mông',icon:'🐻',
+       tips:'Chân rộng hơn squat thường, mũi chân xoay ra ngoài 45°. Bài này nhắm vào đùi trong và mông nhiều hơn.'},
+      {name:'Romanian Deadlift (RDL)',sets:4,reps:'12',rest:60,muscle:'Cơ đùi sau, Mông',icon:'🌼',
+       tips:'Giữ tạ sát thân người, đẩy hông ra sau (KHÔNG phải cúi lưng). Cảm nhận căng cơ đùi sau tối đa.'},
+      {name:'Leg Curl',sets:4,reps:'15',rest:45,muscle:'Cơ đùi sau (Hamstring)',icon:'🐱',
+       tips:'Cuộn chân lại chậm và kiểm soát. Đừng để hông nhấc khỏi máy.'},
+      {name:'Hip Abduction',sets:4,reps:'20',rest:45,muscle:'Mông nhỏ (Glute Med)',icon:'🦋',
+       tips:'Đẩy chân ra ngoài chậm và siết mông tối đa. Cơ mông giữa tạo đường cong hông đặc trưng!'},
+      {name:'Calf Raise',sets:3,reps:'20',rest:30,muscle:'Bắp chân (Calf)',icon:'🌷',
+       tips:'Đứng trên bậc thang để tăng biên độ. Nâng lên cao nhất và giữ 1 giây, hạ xuống thấp nhất và giữ 1 giây.'},
+      {name:'Đi bộ thư giãn',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'4 km/h. Kéo giãn cơ đùi sau bằng cách bước dài hơn. Kéo giãn tĩnh 30 giây.'}
+    ]
+  },
+  5: {
+    name:'Thứ 5', title:'Lưng & Tay', subtitle:'Upper Body Pull',
+    duration:'~65 phút', goal:'Lưng V-shape, tay săn chắc',
+    icon:'🌻', color:'#d4608a',
+    exercises:[
+      {name:'Khởi động đi bộ',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Xoay vai vòng tròn khi đi bộ để làm ấm khớp trước bài pull.'},
+      {name:'Lat Pulldown (Wide Grip)',sets:4,reps:'12–15',rest:60,muscle:'Cơ lưng rộng (Lats)',icon:'🐶',
+       tips:'Kéo thanh xuống đến cằm/ngực trên – KHÔNG kéo xuống sau gáy. Ngực ưỡn về phía thanh. Giữ căng lưng 1 giây.'},
+      {name:'Seated Cable Row',sets:4,reps:'12',rest:60,muscle:'Lưng giữa, Thang lưng',icon:'🐰',
+       tips:'Kéo về phía bụng. Siết bả vai lại với nhau. Thân người giữ thẳng, không ngả ra sau.'},
+      {name:'Dumbbell Single-Arm Row',sets:3,reps:'12/bên',rest:45,muscle:'Lưng rộng, Tay sau',icon:'🌸',
+       tips:'Đặt một tay và gối lên ghế để hỗ trợ. Kéo tạ lên dọc thân, cùi chỏ sát hông. Siết LƯNG để kéo.'},
+      {name:'Face Pull (Cable)',sets:3,reps:'15',rest:45,muscle:'Vai sau, Cơ quay vai',icon:'🌺',
+       tips:'Quan trọng để bảo vệ khớp vai. Kéo dây về phía mặt, cùi chỏ bằng vai. Xoay cổ tay ra ngoài.'},
+      {name:'Dumbbell Bicep Curl',sets:3,reps:'12–15',rest:45,muscle:'Tay trước (Bicep)',icon:'🎀',
+       tips:'Tay áp sát hông, chỉ cùi chỏ gập lại – KHÔNG đung đưa. Xoay cổ tay ra ngoài khi nâng lên. Hạ tạ chậm 2–3 giây.'},
+      {name:'Đi bộ thư giãn',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Giảm nhịp tim từ từ. Kéo giãn lưng bằng cách ôm gối về ngực, giữ 20 giây mỗi bên.'}
+    ]
+  },
+  6: {
+    name:'Thứ 6', title:'Chân & Mông', subtitle:'Power & Pump',
+    duration:'~70 phút', goal:'Kết thúc tuần bằng ngày mông & chân đỉnh cao',
+    icon:'🔥', color:'#ff4488',
+    exercises:[
+      {name:'Khởi động đi bộ',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Ngày chân cuối tuần – khởi động kỹ 5 km/h, tăng dần. Làm ấm khớp háng và gối.'},
+      {name:'Bulgarian Split Squat',sets:4,reps:'10–12/bên',rest:60,muscle:'Đùi trước, Mông',icon:'🐱',
+       tips:'Chân sau đặt lên ghế, chân trước bước xa. Hạ xuống thẳng đứng – KHÔNG để gối trước vượt mũi chân. Bắt đầu không tạ.'},
+      {name:'Hip Thrust',sets:4,reps:'15',rest:60,muscle:'Cơ mông lớn',icon:'🌸',
+       tips:'Siết mông tối đa ở đỉnh và giữ 2 giây – hãy tăng tạ so với thứ 2. Progressive overload là chìa khóa!'},
+      {name:'Romanian Deadlift (RDL)',sets:3,reps:'12',rest:60,muscle:'Cơ đùi sau, Mông',icon:'🌼',
+       tips:'Đẩy hông ra sau, không cúi lưng. Ngày 3 chân nên dùng tạ nhẹ hơn thứ 4, tập trung cảm nhận cơ.'},
+      {name:'Hip Abduction',sets:4,reps:'20',rest:45,muscle:'Mông nhỏ (Glute Med)',icon:'🦋',
+       tips:'Thử tập với kháng lực band. 2 giây ra – 1 giây vào. Kết hợp ngồi và đứng để hit góc cơ khác nhau.'},
+      {name:'Glute Bridge',sets:3,reps:'20',rest:45,muscle:'Cơ mông',icon:'🐶',
+       tips:'Nằm sàn, hông đẩy lên cao. Siết mông ở đỉnh 2 giây. Tốt để pump mông cuối buổi. Thêm band quanh gối.'},
+      {name:'Leg Curl',sets:3,reps:'15',rest:45,muscle:'Cơ đùi sau (Hamstring)',icon:'🌺',
+       tips:'Bài kết thúc buổi chân – cuộn chậm và cảm nhận căng cơ. Dùng tạ nhẹ hơn thứ 4.'},
+      {name:'Đi bộ thư giãn',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Kết thúc tuần tập! 4 km/h, thở sâu. Kéo giãn toàn thân: hip flexor, đùi sau, pigeon pose. Coca giỏi lắm!! 💪'}
+    ]
+  },
+  7:{name:'Thứ 7',title:'Nghỉ ngơi',subtitle:'Rest Day',duration:'',goal:'',icon:'🐾',rest:true},
+  1:{name:'Chủ nhật',title:'Nghỉ ngơi',subtitle:'Rest Day',duration:'',goal:'',icon:'☀️',rest:true}
+};
+
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+const load = (k,d) => { try{return JSON.parse(localStorage.getItem(k))??d}catch{return d} };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+let completedDays = load('completedDays', {});
+let workoutLogs   = load('workoutLogs', []);
+let measurements  = load('measurements', []);
+let currentWorkoutDay = null;
+let currentLog = null;
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+let timerInterval=null, timerTotal=0, timerRemaining=0;
+const CIRC = 2*Math.PI*90; // r=90
+
+function startTimer(sec, exName){
+  if(timerInterval) clearInterval(timerInterval);
+  timerTotal = timerRemaining = sec;
+  document.getElementById('timerExName').textContent = '🌸 Nghỉ sau: '+exName;
+  document.getElementById('timerOverlay').classList.add('show');
+  drawTimer();
+  timerInterval = setInterval(()=>{
+    timerRemaining--;
+    drawTimer();
+    if(timerRemaining<=0){
+      clearInterval(timerInterval); timerInterval=null;
+      document.getElementById('timerOverlay').classList.remove('show');
+      if('vibrate' in navigator) navigator.vibrate([200,100,200]);
+    }
+  }, 1000);
+}
+function drawTimer(){
+  document.getElementById('timerNum').textContent = timerRemaining;
+  const offset = CIRC * (timerRemaining/timerTotal);
+  document.getElementById('timerRing').style.strokeDashoffset = offset;
+}
+function skipTimer(){
+  clearInterval(timerInterval); timerInterval=null;
+  document.getElementById('timerOverlay').classList.remove('show');
+}
+function addTime(s){
+  timerRemaining = Math.min(timerRemaining+s, 300);
+  timerTotal = Math.max(timerTotal, timerRemaining);
+  drawTimer();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function switchPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='progress'){ renderProgress(); renderCalendar(); }
+  if(id==='meas') renderMeasHistory();
+}
+function goHome(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-home').classList.add('active');
+  document.querySelector('.nav-btn').classList.add('active');
+  renderHome();
+}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+const todayKey = () => new Date().toISOString().slice(0,10);
+function getVNDay(){
+  const d = new Date().getDay(); // 0=Sun
+  return d===0 ? 1 : d+1;        // 1=CN, 2=T2...7=T7
+}
+
+function renderHome(){
+  const dayNum = getVNDay();
+  const now = new Date();
+
+  // Greeting based on time
+  const h = now.getHours();
+  const greet = h<12 ? '☀️ Chào buổi sáng!' : h<17 ? '🌤️ Chào buổi chiều!' : '🌙 Chào buổi tối!';
+  document.querySelector('.hero-greeting').textContent = greet;
+
+  // Rotating deco
+  const decos = ['🐱','🐶','🌸','🌺','🦋','🐰','🌼'];
+  const today = new Date().getDay();
+  document.querySelector('.hero-deco').textContent = decos[today % decos.length];
+
+  document.getElementById('homeDate').textContent =
+    now.toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // Stats
+  document.getElementById('streakVal').textContent = calcStreak();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-now.getDay()+1);
+  weekStart.setHours(0,0,0,0);
+  let week=0, total=0;
+  for(const k in completedDays){ total++; if(new Date(k+'T00:00:00')>=weekStart) week++; }
+  document.getElementById('weekWorkouts').textContent = week;
+  document.getElementById('totalWorkouts').textContent = total;
+
+  // Today banner
+  const wd = WORKOUT_DAYS[dayNum];
+  const banner = document.getElementById('todayBanner');
+  if(wd && !wd.rest){
+    const done = completedDays[todayKey()];
+    banner.innerHTML = `
+      <div class="today-banner" onclick="openWorkout(${dayNum})">
+        <div class="arrow">${done?'✅':'▶'}</div>
+        <div class="tag">HÔM NAY</div>
+        <h2>${wd.icon} ${wd.title} – ${wd.subtitle}</h2>
+        <p>${done?'Đã hoàn thành! Coca giỏi lắm 💕':'Nhấn để bắt đầu • '+wd.duration}</p>
+      </div>`;
+  } else {
+    banner.innerHTML = `
+      <div class="rest-card">
+        <div class="icon">${wd?.icon||'😴'}</div>
+        <h3>Hôm nay nghỉ ngơi nha~</h3>
+        <p>Uống nước, ăn ngon, ngủ đủ giấc 💕</p>
+      </div>`;
+  }
+
+  // Week cards
+  const container = document.getElementById('weekCards');
+  container.innerHTML = [2,3,4,5,6,7,1].map(d=>{
+    const wd = WORKOUT_DAYS[d];
+    const isToday = d===dayNum;
+    const done = completedDays[todayKey()] && isToday;
+    const cls = ['day-card', isToday?'today':'', wd.rest?'rest':'', done?'done':''].filter(Boolean).join(' ');
+    const oc = wd.rest?'':`onclick="openWorkout(${d})"`;
+    return `<div class="${cls}" ${oc}>
+      <div class="day-badge">${done?'✅':wd.icon}</div>
+      <div class="day-info">
+        <div class="day-label">${wd.name}</div>
+        <h3>${wd.title}</h3>
+        <p>${wd.subtitle}</p>
+      </div>
+      <div class="day-meta">
+        <div class="time">${wd.duration}</div>
+        <div class="check">${isToday&&!wd.rest&&!done?'▶':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcStreak(){
+  let streak=0, d=new Date();
+  for(let i=0;i<365;i++){
+    const k = d.toISOString().slice(0,10);
+    const dn = d.getDay()===0?1:d.getDay()+1;
+    if(WORKOUT_DAYS[dn]?.rest){ d.setDate(d.getDate()-1); continue; }
+    if(!completedDays[k]) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// ══════════════════════════════════════════
+// WORKOUT PAGE
+// ══════════════════════════════════════════
+function openWorkout(dayNum){
+  currentWorkoutDay = dayNum;
+  const wd = WORKOUT_DAYS[dayNum];
+  const today = todayKey();
+  currentLog = workoutLogs.find(l=>l.date===today&&l.day===dayNum)
+    || {date:today, day:dayNum, sets:{}};
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-workout').classList.add('active');
+
+  // Hero
+  document.getElementById('workoutHero').innerHTML = `
+    <div class="workout-hero">
+      <button class="back-btn" onclick="goHome()">← Quay lại</button>
+      <div class="deco">${wd.icon}</div>
+      <h2>${wd.title}</h2>
+      <div class="sub">${wd.subtitle} • ${wd.duration}</div>
+      <div class="goal-pill">🎯 ${wd.goal}</div>
+    </div>`;
+
+  // Exercises
+  let html = '';
+  wd.exercises.forEach((ex,ei)=>{
+    if(ex.type==='walk'){
+      html += `<div class="walk-card">
+        <div class="wicon">🚶‍♀️</div>
+        <div class="winfo"><h4>${ex.name}</h4><p>${ex.reps} • ${ex.tips}</p></div>
+      </div>`;
+      return;
+    }
+    const saved = currentLog.sets[ex.name]||[];
+    let setsHtml='';
+    for(let s=0;s<ex.sets;s++){
+      const sv=saved[s]||{};
+      setsHtml+=`<div class="set-row" id="setrow-${ei}-${s}">
+        <div class="set-num${sv.done?' done':''}">${s+1}</div>
+        <input class="set-input" type="number" placeholder="kg" min="0" step="0.5"
+          id="kg-${ei}-${s}" value="${sv.kg||''}" onchange="saveSetData(${ei},${s})">
+        <div class="set-label">kg</div>
+        <input class="set-input" type="number" placeholder="reps" min="0"
+          id="reps-${ei}-${s}" value="${sv.reps||''}" onchange="saveSetData(${ei},${s})">
+        <div class="set-label">reps</div>
+        <button class="set-done-btn${sv.done?' done':''}" id="donebtn-${ei}-${s}"
+          onclick="completeSet(${ei},${s},${ex.rest},'${ex.name.replace(/'/g,"\\'")}')">
+          ${sv.done?'✓':'○'}
+        </button>
+      </div>`;
+    }
+    html+=`<div class="exercise-card" id="excard-${ei}">
+      <div class="exercise-header" onclick="toggleEx(${ei})">
+        <div class="exercise-icon">${ex.icon||'🌸'}</div>
+        <div class="exercise-info">
+          <h4>${ex.name}</h4>
+          <div class="meta">
+            <span class="badge badge-pink">${ex.sets}×${ex.reps}</span>
+            <span class="badge badge-dim">${ex.rest}s nghỉ</span>
+            <span class="badge badge-green">${ex.muscle}</span>
+          </div>
+        </div>
+        <div style="color:var(--text2);font-size:20px;margin-left:4px" id="chev-${ei}">›</div>
+      </div>
+      <div class="exercise-expand" id="expand-${ei}">
+        <div class="tips-box">💡 ${ex.tips}</div>
+        ${setsHtml}
+      </div>
+    </div>`;
+  });
+  html += `<button class="complete-btn" onclick="completeWorkout()">🌸 Hoàn thành buổi tập!</button>
+           <div style="height:20px"></div>`;
+  document.getElementById('workoutContent').innerHTML = html;
+}
+
+function toggleEx(ei){
+  const exp=document.getElementById('expand-'+ei);
+  const ch=document.getElementById('chev-'+ei);
+  exp.classList.toggle('open');
+  ch.textContent=exp.classList.contains('open')?'⌄':'›';
+}
+function saveSetData(ei,si){
+  const wd=WORKOUT_DAYS[currentWorkoutDay];
+  const ex=wd.exercises[ei];
+  if(!ex||ex.type==='walk') return;
+  const kg=parseFloat(document.getElementById(`kg-${ei}-${si}`)?.value)||null;
+  const reps=parseInt(document.getElementById(`reps-${ei}-${si}`)?.value)||null;
+  if(!currentLog.sets[ex.name]) currentLog.sets[ex.name]=[];
+  if(!currentLog.sets[ex.name][si]) currentLog.sets[ex.name][si]={};
+  currentLog.sets[ex.name][si].kg=kg;
+  currentLog.sets[ex.name][si].reps=reps;
+  persistLog();
+}
+function completeSet(ei,si,rest,exName){
+  const wd=WORKOUT_DAYS[currentWorkoutDay];
+  const ex=wd.exercises[ei];
+  if(!ex) return;
+  const kg=parseFloat(document.getElementById(`kg-${ei}-${si}`)?.value)||null;
+  const reps=parseInt(document.getElementById(`reps-${ei}-${si}`)?.value)||null;
+  if(!currentLog.sets[ex.name]) currentLog.sets[ex.name]=[];
+  if(!currentLog.sets[ex.name][si]) currentLog.sets[ex.name][si]={};
+  Object.assign(currentLog.sets[ex.name][si],{kg,reps,done:true});
+  persistLog();
+  const btn=document.getElementById(`donebtn-${ei}-${si}`);
+  const num=document.querySelector(`#setrow-${ei}-${si} .set-num`);
+  if(btn){btn.classList.add('done');btn.textContent='✓';}
+  if(num) num.classList.add('done');
+  if(rest>0) startTimer(rest, exName);
+}
+function persistLog(){
+  const idx=workoutLogs.findIndex(l=>l.date===currentLog.date&&l.day===currentLog.day);
+  if(idx>=0) workoutLogs[idx]=currentLog; else workoutLogs.push(currentLog);
+  save('workoutLogs', workoutLogs);
+}
+function completeWorkout(){
+  completedDays[todayKey()]=true;
+  save('completedDays', completedDays);
+  persistLog();
+  const wd=WORKOUT_DAYS[currentWorkoutDay];
+  document.getElementById('doneMsg').textContent=
+    `Coca đã hoàn thành buổi ${wd.title}! Tuyệt vời lắm nha 🌸`;
+  document.getElementById('doneOverlay').classList.add('show');
+  if('vibrate' in navigator) navigator.vibrate([100,50,100,50,300]);
+}
+function closeDone(){
+  document.getElementById('doneOverlay').classList.remove('show');
+  goHome();
+}
+
+// ══════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-based
+
+function renderCalendar(){
+  const now = new Date();
+  const title = new Date(calYear,calMonth,1)
+    .toLocaleDateString('vi-VN',{month:'long',year:'numeric'});
+  document.getElementById('calTitle').textContent = title;
+
+  const firstDay = new Date(calYear,calMonth,1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+  const todayStr = now.toISOString().slice(0,10);
+
+  // dow headers (T2~CN)
+  const dows = ['T2','T3','T4','T5','T6','T7','CN'];
+  let html = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  // offset: firstDay is 0=Sun → we want Mon=0
+  const offset = firstDay===0 ? 6 : firstDay-1;
+  for(let i=0;i<offset;i++) html+=`<div class="cal-day empty"></div>`;
+
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const worked = completedDays[dateStr];
+    const isToday = dateStr===todayStr;
+    let cls = 'cal-day';
+    if(worked) cls+=' worked';
+    if(isToday) cls+=' today-cal';
+    html+=`<div class="${cls}">${day}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function renderProgress(){
+  const sel=document.getElementById('progressExSelect');
+  const names=new Set();
+  Object.values(WORKOUT_DAYS).forEach(wd=>{
+    if(wd.exercises) wd.exercises.forEach(ex=>{if(ex.type!=='walk') names.add(ex.name);});
+  });
+  sel.innerHTML='<option value="">— Chọn bài tập —</option>';
+  [...names].forEach(n=>{ sel.innerHTML+=`<option value="${n}">${n}</option>`; });
+  renderHistoryList();
+}
+
+function renderProgressChart(){
+  const exName=document.getElementById('progressExSelect').value;
+  const area=document.getElementById('progressChartArea');
+  if(!exName){
+    area.innerHTML='<div class="empty-state"><div class="icon">🐶</div><p>Chọn bài tập để xem biểu đồ</p></div>';
+    return;
+  }
+  const pts=[];
+  workoutLogs.forEach(log=>{
+    if(log.sets[exName]){
+      const max=Math.max(...log.sets[exName].filter(s=>s&&s.kg).map(s=>s.kg),0);
+      if(max>0) pts.push({date:log.date,kg:max});
+    }
+  });
+  pts.sort((a,b)=>a.date.localeCompare(b.date));
+  const last8=pts.slice(-8);
+  if(!last8.length){
+    area.innerHTML='<div class="empty-state"><div class="icon">🌸</div><p>Chưa có dữ liệu. Bắt đầu ghi chép cân nặng tạ nhé!</p></div>';
+    return;
+  }
+  const maxKg=Math.max(...last8.map(d=>d.kg));
+  const bars=last8.map(d=>{
+    const h=Math.max(Math.round((d.kg/maxKg)*90),6);
+    return `<div class="bar-col">
+      <div class="bar-val">${d.kg}kg</div>
+      <div class="bar" style="height:${h}px"></div>
+      <div class="bar-date">${d.date.slice(5)}</div>
+    </div>`;
+  }).join('');
+  area.innerHTML=`<div class="progress-chart">
+    <div class="chart-title">🌸 ${exName} – Cân tạ tối đa (kg)</div>
+    <div class="bar-chart">${bars}</div>
+  </div>`;
+}
+
+function renderHistoryList(){
+  const container=document.getElementById('historyList');
+  if(!workoutLogs.length){
+    container.innerHTML='<div class="empty-state"><div class="icon">🐾</div><p>Chưa có lịch sử buổi tập</p></div>';
+    return;
+  }
+  const sorted=[...workoutLogs].reverse().slice(0,30);
+  container.innerHTML=sorted.map((log,i)=>{
+    const wd=WORKOUT_DAYS[log.day];
+    const exCount=Object.keys(log.sets).length;
+    const setCount=Object.values(log.sets).reduce((a,s)=>a+s.filter(x=>x?.done).length,0);
+    const date=new Date(log.date+'T00:00:00').toLocaleDateString('vi-VN',{weekday:'short',day:'numeric',month:'numeric'});
+    // find real index in workoutLogs
+    const realIdx=workoutLogs.length-1-i;
+    return `<div class="history-item">
+      <div class="history-icon">${wd?.icon||'🌸'}</div>
+      <div class="history-info">
+        <h4>${wd?.title||''} – ${wd?.subtitle||''}</h4>
+        <p>${exCount} bài • ${setCount} sets hoàn thành</p>
+      </div>
+      <div class="history-date">${date}</div>
+      <button class="delete-btn" onclick="confirmDelete(${realIdx})">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Delete with confirm ──
+let pendingDeleteIdx = null;
+function confirmDelete(idx){
+  pendingDeleteIdx = idx;
+  const log = workoutLogs[idx];
+  const wd = WORKOUT_DAYS[log?.day];
+  const date = log ? new Date(log.date+'T00:00:00').toLocaleDateString('vi-VN',{day:'numeric',month:'numeric',year:'numeric'}) : '';
+  document.getElementById('confirmMsg').textContent =
+    `Xoá buổi tập "${wd?.title||''}" ngày ${date}?`;
+  document.getElementById('confirmYesBtn').onclick = doDelete;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function doDelete(){
+  if(pendingDeleteIdx===null) return;
+  const log=workoutLogs[pendingDeleteIdx];
+  // Also remove from completedDays if same date has no other log
+  workoutLogs.splice(pendingDeleteIdx,1);
+  save('workoutLogs', workoutLogs);
+  // Check if completedDays entry should be removed
+  if(log && !workoutLogs.find(l=>l.date===log.date)){
+    delete completedDays[log.date];
+    save('completedDays', completedDays);
+  }
+  closeConfirm();
+  renderHistoryList();
+  renderCalendar();
+  renderProgressChart();
+}
+function closeConfirm(){
+  pendingDeleteIdx=null;
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// MEASUREMENTS
+// ══════════════════════════════════════════
+function saveMeasurements(){
+  const m={
+    date:todayKey(),
+    weight:parseFloat(document.getElementById('m-weight').value)||null,
+    waist:parseFloat(document.getElementById('m-waist').value)||null,
+    hip:parseFloat(document.getElementById('m-hip').value)||null,
+    arm:parseFloat(document.getElementById('m-arm').value)||null,
+    thigh:parseFloat(document.getElementById('m-thigh').value)||null,
+  };
+  const idx=measurements.findIndex(x=>x.date===m.date);
+  if(idx>=0) measurements[idx]=m; else measurements.push(m);
+  save('measurements',measurements);
+  renderMeasHistory();
+  const btn=document.querySelector('#page-meas .btn-primary');
+  btn.textContent='✅ Đã lưu rồi nha!';
+  setTimeout(()=>btn.textContent='Lưu số đo 💾',1600);
+}
+function renderMeasHistory(){
+  const container=document.getElementById('measHistory');
+  if(!measurements.length){
+    container.innerHTML='<div class="empty-state"><div class="icon">🎀</div><p>Chưa có số đo nào</p></div>';
+    return;
+  }
+  container.innerHTML=[...measurements].reverse().slice(0,10).map(m=>{
+    const date=new Date(m.date+'T00:00:00').toLocaleDateString('vi-VN',{day:'numeric',month:'numeric',year:'numeric'});
+    const parts=[];
+    if(m.weight) parts.push(`🐾 ${m.weight}kg`);
+    if(m.waist)  parts.push(`🎀 Eo ${m.waist}cm`);
+    if(m.hip)    parts.push(`🍑 Hông ${m.hip}cm`);
+    if(m.arm)    parts.push(`🌸 Tay ${m.arm}cm`);
+    if(m.thigh)  parts.push(`🦋 Đùi ${m.thigh}cm`);
+    return `<div class="card" style="padding:12px 16px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">${date}</div>
+      <div style="font-size:13px;line-height:1.9">${parts.join(' • ')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// LOCK SCREEN
+// ══════════════════════════════════════════
+const CORRECT_PIN = '24';
+let pinBuffer = '';
+
+function initLock() {
+  // Đã unlock trong session này thì bỏ qua
+  if (sessionStorage.getItem('unlocked') === '1') {
+    document.getElementById('lockScreen').classList.add('hidden');
+    renderHome();
+    return;
+  }
+  // Chưa unlock — hiện lock screen
+  document.getElementById('lockScreen').classList.remove('hidden');
+}
+
+function pinPress(digit) {
+  if (pinBuffer.length >= CORRECT_PIN.length) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === CORRECT_PIN.length) {
+    setTimeout(checkPin, 80);
+  }
+}
+
+function pinDelete() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < CORRECT_PIN.length; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (dot) dot.classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function checkPin() {
+  if (pinBuffer === CORRECT_PIN) {
+    // Đúng — đổi icon thành mở khoá, unlock sau 300ms
+    document.querySelector('.lock-deco').textContent = '🌸';
+    document.querySelector('.lock-title').style['-webkit-text-fill-color'] = '';
+    document.querySelector('.lock-title').textContent = 'Xin chào Coca! 💕';
+    setTimeout(() => {
+      sessionStorage.setItem('unlocked', '1');
+      document.getElementById('lockScreen').classList.add('hidden');
+      renderHome();
+    }, 500);
+  } else {
+    // Sai — rung dots, hiện lỗi
+    const dots = document.querySelectorAll('.pin-dot');
+    dots.forEach(d => { d.classList.add('shake'); d.style.background='#c94475'; });
+    document.getElementById('lockError').classList.add('show');
+    setTimeout(() => {
+      dots.forEach(d => { d.classList.remove('shake'); d.style.background=''; d.classList.remove('filled'); });
+      document.getElementById('lockError').classList.remove('show');
+      pinBuffer = '';
+      updatePinDots();
+    }, 900);
+  }
+}
+
+// Hỗ trợ bấm phím trên máy tính
+document.addEventListener('keydown', e => {
+  if (document.getElementById('lockScreen').classList.contains('hidden')) return;
+  if (e.key >= '0' && e.key <= '9') pinPress(e.key);
+  if (e.key === 'Backspace') pinDelete();
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+initLock();
+</script>
+</body>
+</html>
