@@ -356,6 +356,23 @@
   .walk-card .winfo h4 { font-size: 14px; font-weight: 700; color: var(--accent2); }
   .walk-card .winfo p { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
 
+  /* ── VIDEO PLAYER ── */
+  .video-wrap { margin-bottom: 12px; border-radius: 12px; overflow: hidden; background: #000; }
+  .video-wrap video { width: 100%; display: block; max-height: 240px; object-fit: cover; }
+  .video-tabs {
+    display: flex; gap: 0; margin-bottom: 8px;
+    background: var(--bg); border-radius: 10px; padding: 3px;
+  }
+  .vtab {
+    flex: 1; padding: 7px; border-radius: 8px; border: none;
+    background: transparent; color: var(--text2);
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .vtab.active {
+    background: linear-gradient(135deg, #c94475, #ff6b9d);
+    color: #fff; box-shadow: 0 2px 8px rgba(201,68,117,.3);
+  }
+
   /* ── COMPLETE BTN ── */
   .complete-btn {
     background: linear-gradient(135deg, #c94475, #ff6b9d);
@@ -1019,6 +1036,44 @@ function calcStreak(){
 }
 
 // ══════════════════════════════════════════
+// VIDEO MAP
+// ══════════════════════════════════════════
+const V = 'video/';
+const VIDEO_MAP = {
+  'Barbell / Goblet Squat':      { front: V+'female-dumbbell-goblet-squat-front.mp4',                           side: V+'female-dumbbell-goblet-squat-side.mp4' },
+  'Hip Thrust':                  { front: V+'female-Dumbbells-dumbbell-hip-thrust-front.mp4',                   side: V+'female-Dumbbells-dumbbell-hip-thrust-side.mp4' },
+  'Hip Abduction':               { front: V+'female-Machine-machine-hip-abduction-front.mp4',                   side: V+'female-Machine-machine-hip-abduction-side.mp4' },
+  'Leg Press':                   { front: V+'female-Machine-vertical-leg-press-front.mp4',                      side: V+'female-Machine-vertical-leg-press-side.mp4' },
+  'Dumbbell Bench Press':        { front: V+'female-dumbbell-bench-press-front_9Asgczg.mp4',                    side: V+'female-dumbbell-bench-press-side_5wGWrBA.mp4' },
+  'Incline Dumbbell Press':      { front: V+'female-dumbbell-incline-bench-press-front_ctz2966.mp4',            side: V+'female-dumbbell-incline-bench-press-side_cQCX9or.mp4' },
+  'Dumbbell Shoulder Press':     { front: V+'female-dumbbell-seated-overhead-press-front.mp4',                  side: V+'female-dumbbell-seated-overhead-press-side.mp4' },
+  'Lateral Raise (Dumbbell)':    { front: V+'female-Dumbbells-dumbbell-lateral-raise-front.mp4',                side: V+'female-Dumbbells-dumbbell-lateral-raise-side.mp4' },
+  'Cable Lateral Raise':         { front: V+'female-Dumbbells-dumbbell-lateral-raise-front.mp4',                side: V+'female-Dumbbells-dumbbell-lateral-raise-side.mp4' },
+  'Sumo Squat':                  { front: V+'female-dumbbell-sumo-squat-front.mp4',                             side: V+'female-dumbbell-sumo-squat-side.mp4' },
+  'Romanian Deadlift (RDL)':     { front: V+'female-Dumbbells-dumbbell-romanian-deadlift-front.mp4',            side: V+'female-Dumbbells-dumbbell-romanian-deadlift-side.mp4' },
+  'Leg Curl':                    { front: V+'female-machine-hamstring-curl-front.mp4',                          side: V+'female-machine-hamstring-curl-side.mp4' },
+  'Calf Raise':                  { front: V+'female-machine-standing-calf-raises-front.mp4',                    side: V+'female-machine-standing-calf-raises-side.mp4' },
+  'Bulgarian Split Squat':       { front: V+'female-Dumbbells-dumbbell-bulgarian-split-squat-front.mp4',        side: V+'female-Dumbbells-dumbbell-bulgarian-split-squat-side.mp4' },
+  'Glute Bridge':                { front: V+'female-Dumbbells-dumbbell-glute-bridge-front.mp4',                 side: V+'female-Dumbbells-dumbbell-glute-bridge-side.mp4' },
+  'Lat Pulldown (Wide Grip)':    { front: V+'female-machine-pulldown-front.mp4',                                side: V+'female-machine-pulldown-side.mp4' },
+  'Seated Cable Row':            { front: V+'female-machine-seated-cable-row-front.mp4',                        side: V+'female-machine-seated-cable-row-side.mp4' },
+  'Dumbbell Single-Arm Row':     { front: V+'female-Dumbbells-dumbbell-kneeling-single-arm-row-front.mp4',      side: V+'female-Dumbbells-dumbbell-kneeling-single-arm-row-side.mp4' },
+  'Face Pull (Cable)':           { front: V+'female-Machine-machine-face-pulls-front.mp4',                      side: V+'female-Machine-machine-face-pulls-side.mp4' },
+  'Dumbbell Bicep Curl':         { front: V+'female-Dumbbells-dumbbell-curl-front.mp4',                         side: V+'female-Dumbbells-dumbbell-curl-side.mp4' },
+  'Arnold Press':                { front: V+'female-Dumbbells-dumbbell-arnold-press-front.mp4',                  side: V+'female-Dumbbells-dumbbell-arnold-press-side.mp4' },
+  'Walking Lunge':               { front: V+'female-Recovery-lunge-walking-front.mp4',                           side: V+'female-Recovery-lunge-walking-side.mp4' },
+};
+
+function switchView(ei, view) {
+  const vids = VIDEO_MAP[WORKOUT_DAYS[currentWorkoutDay]?.exercises[ei]?.name];
+  if (!vids) return;
+  const video = document.getElementById('vid-'+ei);
+  const tabs = document.querySelectorAll(`#vp-${ei} .vtab`);
+  if (video) { video.src = vids[view]; video.play(); }
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.view === view));
+}
+
+// ══════════════════════════════════════════
 // WORKOUT PAGE
 // ══════════════════════════════════════════
 function openWorkout(dayNum){
@@ -1084,6 +1139,19 @@ function openWorkout(dayNum){
         <div style="color:var(--text2);font-size:20px;margin-left:4px" id="chev-${ei}">›</div>
       </div>
       <div class="exercise-expand" id="expand-${ei}">
+        ${(()=>{
+          const vids = VIDEO_MAP[ex.name];
+          if (!vids) return '';
+          return `<div id="vp-${ei}">
+            <div class="video-tabs">
+              <button class="vtab active" data-view="front" onclick="switchView(${ei},'front')">📹 Mặt trước</button>
+              <button class="vtab" data-view="side" onclick="switchView(${ei},'side')">↔️ Bên hông</button>
+            </div>
+            <div class="video-wrap">
+              <video id="vid-${ei}" src="${vids.front}" autoplay muted loop playsinline></video>
+            </div>
+          </div>`;
+        })()}
         <div class="tips-box">💡 ${ex.tips}</div>
         ${setsHtml}
       </div>
