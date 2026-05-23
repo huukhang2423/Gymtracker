@@ -1,0 +1,21 @@
+{
+  "name": "Beast Tracker 💪",
+  "short_name": "BeastMode",
+  "description": "Gym tracker for the beast",
+  "start_url": "/Gymtracker/gym-male.html",
+  "scope": "/Gymtracker/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080808",
+  "theme_color": "#89d400",
+  "icons": [
+    {
+      "src": "icon-male.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness"],
+  "lang": "vi"
+}

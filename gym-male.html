@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest-male.json">
+<title>BEAST MODE 💀</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@400;600;700&display=swap');
+
+:root {
+  --bg:      #080808;
+  --surface: #111111;
+  --surface2:#1a1a1a;
+  --surface3:#222222;
+  --green:   #89d400;
+  --green2:  #a8ff00;
+  --green-dim: rgba(137,212,0,.12);
+  --green-glow: 0 0 20px rgba(137,212,0,.4);
+  --red:     #ff2e2e;
+  --text:    #f0f0f0;
+  --text2:   #888;
+  --radius:  4px;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: .4;
+}
+
+/* ── NAV ── */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background: #0a0a0a;
+  display:flex;
+  border-top: 1px solid #1f1f1f;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-btn {
+  flex:1; padding:12px 4px 8px;
+  background:none; border:none; color:var(--text2);
+  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  cursor:pointer; transition:color .2s;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  font-family:'Barlow Condensed', sans-serif;
+}
+.nav-btn.active { color:var(--green); }
+.nav-btn.active span { text-shadow: var(--green-glow); }
+.nav-btn > .icon { font-size:20px; line-height:1; }
+
+/* ── PAGES ── */
+.page { display:none; padding:0 0 88px; max-width:600px; margin:0 auto; position:relative; z-index:1; }
+.page.active { display:block; }
+.page-body { padding:0 14px; }
+
+/* ── HOME HERO ── */
+.home-hero {
+  background: #000;
+  padding: 50px 20px 28px;
+  position:relative; overflow:hidden;
+  border-bottom: 3px solid var(--green);
+}
+.home-hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at 70% 0%, rgba(137,212,0,.08) 0%, transparent 60%);
+}
+/* Claw marks */
+.home-hero::after {
+  content:'';
+  position:absolute; right:16px; top:16px; width:80px; height:80px;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent 0px, transparent 8px,
+    rgba(137,212,0,.15) 8px, rgba(137,212,0,.15) 10px
+  );
+  clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+}
+.hero-eyebrow {
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:11px; font-weight:700; letter-spacing:3px;
+  color:var(--green); text-transform:uppercase; margin-bottom:8px;
+}
+.hero-title {
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:46px; font-weight:900; line-height:.95;
+  text-transform:uppercase; letter-spacing:-1px;
+  color:#fff; margin-bottom:4px;
+}
+.hero-title span { color:var(--green); }
+.hero-date { font-size:12px; color:var(--text2); margin-top:8px; text-transform:uppercase; letter-spacing:1px; }
+.hero-monster {
+  position:absolute; right:20px; bottom:16px;
+  font-size:56px; opacity:.08; line-height:1;
+  font-family:'Barlow Condensed',sans-serif; font-weight:900;
+  color:var(--green); letter-spacing:-4px;
+}
+
+/* ── STAT BOXES ── */
+.stat-row { display:flex; gap:8px; margin:14px 14px 0; }
+.stat-box {
+  flex:1; background:var(--surface);
+  border:1px solid #1f1f1f;
+  border-top:3px solid var(--green);
+  padding:12px 10px 10px; position:relative; overflow:hidden;
+}
+.stat-box::after {
+  content:''; position:absolute; bottom:0; right:0;
+  width:40px; height:40px;
+  background: var(--green-dim);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.stat-box .val {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:34px; font-weight:900; color:var(--green); line-height:1;
+}
+.stat-box .lbl { font-size:9px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-top:3px; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px; font-weight:700; letter-spacing:3px;
+  color:var(--text2); text-transform:uppercase;
+  margin:20px 0 10px;
+  display:flex; align-items:center; gap:10px;
+}
+.section-title::after {
+  content:''; flex:1; height:1px;
+  background: linear-gradient(to right, #2a2a2a, transparent);
+}
+
+/* ── TODAY BANNER ── */
+.today-banner {
+  background: #000;
+  border: 1px solid #1f1f1f;
+  border-left: 4px solid var(--green);
+  padding: 18px 20px;
+  margin: 14px 0;
+  cursor: pointer;
+  position: relative; overflow:hidden;
+  transition: border-color .2s;
+}
+.today-banner:active { border-color: var(--green2); }
+.today-banner::before {
+  content:''; position:absolute; top:0; right:0; bottom:0; width:80px;
+  background: linear-gradient(to left, rgba(137,212,0,.05), transparent);
+}
+.today-banner .tb-tag {
+  font-size:9px; font-weight:700; letter-spacing:3px;
+  color:var(--green); text-transform:uppercase; margin-bottom:6px;
+}
+.today-banner h2 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
+}
+.today-banner p { font-size:12px; color:var(--text2); margin-top:4px; }
+.today-banner .tb-arrow {
+  position:absolute; right:16px; top:50%; transform:translateY(-50%);
+  font-size:24px; color:var(--green);
+}
+.rest-card {
+  background:var(--surface); border:1px solid #1f1f1f;
+  padding:20px; margin:14px 0; text-align:center;
+}
+.rest-card .icon { font-size:36px; margin-bottom:8px; }
+.rest-card h3 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px; font-weight:900; text-transform:uppercase;
+}
+.rest-card p { font-size:12px; color:var(--text2); margin-top:4px; }
+
+/* ── DAY CARDS ── */
+.day-card {
+  display:flex; align-items:center; gap:14px;
+  background:var(--surface); border:1px solid #1f1f1f;
+  border-left: 3px solid transparent;
+  padding:13px 16px; margin-bottom:8px; cursor:pointer;
+  transition:all .2s;
+}
+.day-card:active { background:var(--surface2); }
+.day-card.today { border-left-color:var(--green); }
+.day-card.done  { border-left-color:#555; }
+.day-card.rest  { opacity:.4; cursor:default; }
+
+.day-badge {
+  width:46px; height:46px;
+  background:var(--surface2); border:1px solid #2a2a2a;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+  color:var(--text2); flex-shrink:0; text-transform:uppercase;
+}
+.day-card.today .day-badge { background:var(--green); color:#000; border-color:var(--green); }
+.day-card.done .day-badge  { background:#1a1a1a; }
+.day-badge .di { font-size:20px; line-height:1; }
+
+.day-info { flex:1; }
+.day-info .day-label { font-size:9px; color:var(--text2); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; margin-bottom:2px; }
+.day-info h3 { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:900; text-transform:uppercase; letter-spacing:.5px; }
+.day-info p  { font-size:11px; color:var(--text2); margin-top:1px; }
+.day-meta { text-align:right; }
+.day-meta .time { font-size:11px; color:var(--text2); font-weight:700; }
+.day-meta .chk  { font-size:16px; margin-top:2px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  background:#000; padding:50px 20px 20px;
+  border-bottom:2px solid var(--green);
+  margin-bottom:4px; position:relative; overflow:hidden;
+}
+.page-header::after {
+  content:''; position:absolute; top:0; right:0; bottom:0; width:100px;
+  background: radial-gradient(ellipse at right, rgba(137,212,0,.06), transparent);
+}
+.page-header h1 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:30px; font-weight:900; text-transform:uppercase; letter-spacing:2px;
+}
+.page-header p { font-size:12px; color:var(--text2); margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+
+/* ── WORKOUT HERO ── */
+.workout-hero {
+  background:#000; padding:50px 20px 24px;
+  border-bottom:3px solid var(--green); position:relative; overflow:hidden;
+}
+.workout-hero::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(137,212,0,.07), transparent 60%);
+}
+.workout-hero h2 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:32px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
+}
+.workout-hero .sub { font-size:12px; color:var(--text2); margin-top:4px; text-transform:uppercase; letter-spacing:1.5px; }
+.workout-hero .goal-tag {
+  display:inline-block; background:var(--green-dim);
+  border:1px solid rgba(137,212,0,.3);
+  padding:5px 12px; margin-top:12px; font-size:11px;
+  color:var(--green); text-transform:uppercase; letter-spacing:1px; font-weight:700;
+}
+.back-btn {
+  position:absolute; top:14px; left:16px;
+  background:var(--surface2); border:1px solid #2a2a2a;
+  color:var(--text2); font-size:11px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; cursor:pointer; padding:6px 12px;
+  display:flex; align-items:center; gap:4px;
+}
+
+/* ── EXERCISE CARD ── */
+.exercise-card {
+  background:var(--surface); margin:0 14px 8px;
+  border:1px solid #1f1f1f; border-left:3px solid #2a2a2a;
+  transition:border-color .2s; overflow:hidden;
+}
+.exercise-card.open { border-left-color:var(--green); }
+
+.exercise-header {
+  padding:13px 14px; display:flex; align-items:center; gap:12px; cursor:pointer;
+}
+.exercise-icon {
+  width:44px; height:44px; background:var(--surface2);
+  border:1px solid #2a2a2a;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+}
+.exercise-info { flex:1; }
+.exercise-info h4 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px; font-weight:900; text-transform:uppercase; letter-spacing:.5px;
+}
+.exercise-info .meta { display:flex; gap:6px; margin-top:5px; flex-wrap:wrap; }
+.badge {
+  padding:2px 8px; font-size:9px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; white-space:nowrap;
+}
+.badge-green { background:var(--green-dim); color:var(--green); border:1px solid rgba(137,212,0,.2); }
+.badge-dim   { background:#1a1a1a; color:var(--text2); border:1px solid #2a2a2a; }
+.badge-red   { background:rgba(255,46,46,.1); color:#ff6b6b; border:1px solid rgba(255,46,46,.2); }
+
+.exercise-expand { padding:0 14px 14px; display:none; }
+.exercise-expand.open { display:block; }
+.tips-box {
+  background:#0d0d0d; border-left:3px solid var(--green);
+  padding:10px 12px; font-size:12px; color:var(--text2);
+  line-height:1.7; margin-bottom:12px;
+}
+
+/* ── SET LOGGER ── */
+.set-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.set-num {
+  width:28px; height:28px; background:var(--surface2); border:1px solid #2a2a2a;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px; font-weight:900; color:var(--text2); flex-shrink:0;
+}
+.set-num.done { background:var(--green); color:#000; border-color:var(--green); }
+.set-input {
+  background:#0d0d0d; border:1px solid #2a2a2a;
+  color:var(--text); padding:7px 10px;
+  font-size:14px; width:68px; text-align:center;
+  font-family:'Barlow',sans-serif;
+}
+.set-input:focus { outline:none; border-color:var(--green); }
+.set-label { font-size:11px; color:var(--text2); width:28px; font-weight:700; text-transform:uppercase; }
+.set-done-btn {
+  margin-left:auto; width:34px; height:34px;
+  background:var(--surface2); border:1px solid #2a2a2a; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  transition:all .2s;
+}
+.set-done-btn.done { background:var(--green); border-color:var(--green); color:#000; }
+
+/* ── WALK CARD ── */
+.walk-card {
+  background:var(--surface2); border:1px solid #1f1f1f;
+  border-left:3px solid #333;
+  margin:0 14px 8px; padding:13px 16px;
+  display:flex; align-items:center; gap:12px;
+}
+.walk-card .wicon { font-size:24px; }
+.walk-card .winfo h4 { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:900; text-transform:uppercase; color:var(--text2); }
+.walk-card .winfo p { font-size:11px; color:#555; margin-top:3px; line-height:1.5; }
+
+/* ── COMPLETE BTN ── */
+.complete-btn {
+  background: var(--green);
+  color:#000; border:none; padding:16px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px; font-weight:900; text-transform:uppercase; letter-spacing:2px;
+  cursor:pointer; width:calc(100% - 28px); margin:14px 14px 0;
+  transition:all .15s; position:relative; overflow:hidden;
+}
+.complete-btn::before {
+  content:''; position:absolute; inset:0;
+  background: repeating-linear-gradient(-55deg, transparent 0, transparent 10px, rgba(0,0,0,.07) 10px, rgba(0,0,0,.07) 12px);
+}
+.complete-btn:active { background:var(--green2); transform:scale(.98); }
+
+/* ── TIMER ── */
+.timer-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.93); z-index:200;
+  display:none; align-items:center; justify-content:center; flex-direction:column;
+}
+.timer-overlay.show { display:flex; }
+.timer-circle {
+  width:200px; height:200px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; margin-bottom:30px; position:relative;
+}
+.timer-circle svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+.timer-bg { stroke:#1a1a1a; }
+.timer-ring { stroke:var(--green); filter: drop-shadow(0 0 6px var(--green)); transition:stroke-dashoffset .9s linear; }
+.timer-num {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:58px; font-weight:900; color:var(--green);
+}
+.timer-lbl { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:2px; }
+.timer-label { font-size:14px; color:var(--text2); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px; }
+.timer-skip {
+  background:var(--surface); border:1px solid #2a2a2a;
+  color:var(--text); padding:12px 32px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:1px; cursor:pointer;
+}
+.timer-add { background:transparent; border:none; color:var(--text2); padding:10px 20px; font-size:13px; cursor:pointer; text-transform:uppercase; letter-spacing:1px; }
+
+/* ── DONE OVERLAY ── */
+.done-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.96); z-index:300;
+  display:none; align-items:center; justify-content:center;
+  flex-direction:column; text-align:center; padding:30px;
+}
+.done-overlay.show { display:flex; }
+.done-overlay .done-icon { font-size:72px; margin-bottom:10px; animation:pop .4s ease; }
+.done-overlay .done-sparks { font-size:28px; letter-spacing:6px; margin-bottom:16px; color:var(--green); font-family:'Barlow Condensed',sans-serif; font-weight:900; letter-spacing:4px; text-transform:uppercase; }
+.done-overlay h2 { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:900; text-transform:uppercase; color:var(--green); margin-bottom:8px; }
+.done-overlay p { font-size:14px; color:var(--text2); margin-bottom:30px; }
+@keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+/* ── LOCK SCREEN ── */
+#lockScreen {
+  position:fixed; inset:0; z-index:9999;
+  background:#000;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; padding:30px;
+}
+#lockScreen.hidden { display:none; }
+#lockScreen::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse at 50% 0%, rgba(137,212,0,.06) 0%, transparent 60%);
+}
+.lock-logo {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:60px; font-weight:900; text-transform:uppercase;
+  color:var(--green); letter-spacing:-2px; margin-bottom:4px;
+  text-shadow: var(--green-glow);
+  position:relative; z-index:1;
+}
+.lock-sub {
+  font-size:11px; color:var(--text2); text-transform:uppercase;
+  letter-spacing:3px; margin-bottom:40px; position:relative; z-index:1;
+}
+.pin-dots { display:flex; gap:14px; margin-bottom:32px; position:relative; z-index:1; }
+.pin-dot {
+  width:14px; height:14px; border:2px solid #333; background:transparent; transition:all .2s;
+}
+.pin-dot.filled { background:var(--green); border-color:var(--green); box-shadow:var(--green-glow); }
+
+.pin-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:10px; max-width:280px; width:100%; position:relative; z-index:1;
+}
+.pin-btn {
+  aspect-ratio:1; background:var(--surface); border:1px solid #1f1f1f;
+  color:var(--text); font-family:'Barlow Condensed',sans-serif;
+  font-size:26px; font-weight:900; cursor:pointer; transition:all .15s;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1px;
+  user-select:none;
+}
+.pin-btn:active { background:var(--green); color:#000; border-color:var(--green); transform:scale(.93); }
+.pin-btn .sub-letters { font-size:8px; color:var(--text2); font-weight:700; letter-spacing:1.5px; font-family:'Barlow',sans-serif; }
+.pin-del { font-size:20px; }
+.lock-error { margin-top:20px; font-size:12px; color:var(--red); opacity:0; transition:opacity .2s; text-transform:uppercase; letter-spacing:2px; font-weight:700; position:relative; z-index:1; }
+.lock-error.show { opacity:1; }
+
+/* ── CALENDAR ── */
+.calendar-card {
+  background:var(--surface); border:1px solid #1f1f1f;
+  border-top:2px solid var(--green); padding:16px; margin-bottom:14px;
+}
+.cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.cal-header h3 { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+.cal-nav { background:none; border:none; color:var(--text2); font-size:22px; cursor:pointer; padding:2px 8px; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal-dow { text-align:center; font-size:9px; color:var(--text2); font-weight:700; padding:4px 0; text-transform:uppercase; letter-spacing:1px; }
+.cal-day {
+  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:var(--text2); position:relative;
+}
+.cal-day.empty { opacity:0; }
+.cal-day.worked { background:var(--green); color:#000; font-weight:900; }
+.cal-day.today-cal { border:2px solid var(--green); color:var(--green); }
+.cal-day.worked.today-cal { border:2px solid #fff; }
+.cal-legend { display:flex; gap:14px; margin-top:12px; font-size:10px; color:var(--text2); justify-content:center; text-transform:uppercase; letter-spacing:1px; }
+.cal-legend span { display:flex; align-items:center; gap:5px; }
+.legend-dot { width:10px; height:10px; background:var(--green); }
+.legend-dot.today { background:none; border:2px solid var(--green); }
+
+/* ── HISTORY ── */
+.history-item {
+  background:var(--surface); border:1px solid #1f1f1f;
+  border-left:3px solid #2a2a2a;
+  padding:12px 14px; margin-bottom:7px;
+  display:flex; align-items:center; gap:12px;
+  transition:border-color .2s;
+}
+.history-item:hover { border-left-color:var(--green); }
+.history-icon { font-size:24px; flex-shrink:0; }
+.history-info { flex:1; min-width:0; }
+.history-info h4 { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:900; text-transform:uppercase; }
+.history-info p { font-size:11px; color:var(--text2); margin-top:2px; }
+.history-date { font-size:10px; color:var(--text2); flex-shrink:0; text-transform:uppercase; letter-spacing:.5px; }
+.delete-btn {
+  background:rgba(255,46,46,.08); border:1px solid rgba(255,46,46,.15);
+  color:#ff4444; padding:6px 10px; font-size:13px; cursor:pointer; flex-shrink:0;
+  transition:background .2s;
+}
+.delete-btn:active { background:rgba(255,46,46,.2); }
+
+/* ── PROGRESS CHART ── */
+.progress-chart { background:var(--surface); border:1px solid #1f1f1f; border-top:2px solid var(--green); padding:16px; margin-bottom:12px; }
+.chart-title { font-size:11px; color:var(--text2); margin-bottom:14px; text-transform:uppercase; letter-spacing:2px; font-weight:700; }
+.bar-chart { display:flex; align-items:flex-end; gap:6px; height:110px; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bar { width:100%; background:linear-gradient(to top, #4a7a00, var(--green)); min-height:4px; }
+.bar-val { font-size:9px; color:var(--text2); font-weight:700; }
+.bar-date { font-size:8px; color:var(--text2); text-transform:uppercase; }
+
+/* ── SELECT ── */
+.exercise-select {
+  background:var(--surface); border:1px solid #2a2a2a;
+  color:var(--text); padding:12px 14px;
+  font-size:13px; width:100%; margin-bottom:16px;
+  font-family:'Barlow',sans-serif; appearance:none;
+}
+
+/* ── MEASUREMENTS ── */
+.card { background:var(--surface); border:1px solid #1f1f1f; border-top:2px solid var(--green); padding:16px; margin-bottom:12px; }
+.meas-row { display:flex; gap:10px; align-items:center; margin-bottom:11px; }
+.meas-label { flex:1; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); }
+.meas-input { background:#0d0d0d; border:1px solid #2a2a2a; color:var(--text); padding:9px 12px; font-size:14px; width:90px; text-align:center; font-family:'Barlow',sans-serif; }
+.meas-input:focus { outline:none; border-color:var(--green); }
+.meas-unit { font-size:11px; color:var(--text2); width:28px; font-weight:700; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  background:var(--green); color:#000; border:none; padding:14px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px; font-weight:900; text-transform:uppercase; letter-spacing:2px;
+  cursor:pointer; width:100%; transition:all .15s;
+}
+.btn-primary:active { background:var(--green2); }
+
+/* ── CONFIRM ── */
+.confirm-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:400;
+  display:none; align-items:flex-end; justify-content:center;
+}
+.confirm-overlay.show { display:flex; }
+.confirm-sheet {
+  background:var(--surface2); border-top:2px solid var(--green);
+  padding:24px 20px 36px; width:100%; max-width:600px;
+}
+.confirm-sheet h3 { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
+.confirm-sheet p { font-size:13px; color:var(--text2); margin-bottom:20px; }
+.confirm-btns { display:flex; gap:10px; }
+.btn-cancel { flex:1; background:var(--surface); border:1px solid #2a2a2a; color:var(--text); padding:13px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:900; text-transform:uppercase; cursor:pointer; }
+.btn-danger  { flex:1; background:var(--red); border:none; color:#fff; padding:13px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:900; text-transform:uppercase; cursor:pointer; }
+
+/* ── EMPTY ── */
+.empty-state { text-align:center; padding:36px 20px; color:var(--text2); }
+.empty-state .icon { font-size:40px; margin-bottom:10px; opacity:.5; }
+.empty-state p { font-size:12px; text-transform:uppercase; letter-spacing:1px; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:#2a2a2a; }
+</style>
+</head>
+<body>
+
+<!-- ══ LOCK SCREEN ══ -->
+<div id="lockScreen">
+  <div class="lock-logo">BEAST<br>MODE</div>
+  <div class="lock-sub">Enter PIN to access</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="dot0"></div>
+    <div class="pin-dot" id="dot1"></div>
+  </div>
+  <div class="pin-grid">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2<div class="sub-letters">ABC</div></button>
+    <button class="pin-btn" onclick="pinPress('3')">3<div class="sub-letters">DEF</div></button>
+    <button class="pin-btn" onclick="pinPress('4')">4<div class="sub-letters">GHI</div></button>
+    <button class="pin-btn" onclick="pinPress('5')">5<div class="sub-letters">JKL</div></button>
+    <button class="pin-btn" onclick="pinPress('6')">6<div class="sub-letters">MNO</div></button>
+    <button class="pin-btn" onclick="pinPress('7')">7<div class="sub-letters">PQRS</div></button>
+    <button class="pin-btn" onclick="pinPress('8')">8<div class="sub-letters">TUV</div></button>
+    <button class="pin-btn" onclick="pinPress('9')">9<div class="sub-letters">WXYZ</div></button>
+    <div></div>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn" onclick="pinDelete()"><span class="pin-del">⌫</span></button>
+  </div>
+  <div class="lock-error" id="lockError">WRONG PIN — TRY AGAIN</div>
+</div>
+
+<!-- ══ REST TIMER ══ -->
+<div class="timer-overlay" id="timerOverlay">
+  <div class="timer-label" id="timerExName"></div>
+  <div class="timer-circle">
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <circle class="timer-bg" cx="100" cy="100" r="90" stroke-width="6" fill="none"/>
+      <circle class="timer-ring" id="timerRing" cx="100" cy="100" r="90"
+        stroke-width="6" fill="none" stroke-linecap="butt"
+        stroke-dasharray="565" stroke-dashoffset="565"/>
+    </svg>
+    <div class="timer-num" id="timerNum">60</div>
+    <div class="timer-lbl">REST TIME</div>
+  </div>
+  <button class="timer-skip" onclick="skipTimer()">SKIP ▶</button>
+  <button class="timer-add" onclick="addTime(30)">+ 30 SEC</button>
+</div>
+
+<!-- ══ WORKOUT DONE ══ -->
+<div class="done-overlay" id="doneOverlay">
+  <div class="done-icon">🏆</div>
+  <div class="done-sparks">SESSION COMPLETE</div>
+  <h2>BEAST MODE<br>ACTIVATED</h2>
+  <p id="doneMsg">Outstanding work. Recovery is now your priority.</p>
+  <button class="btn-primary" style="max-width:300px" onclick="closeDone()">BACK TO HOME</button>
+</div>
+
+<!-- ══ CONFIRM DELETE ══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-sheet">
+    <h3>Delete Session?</h3>
+    <p id="confirmMsg">This action cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-danger" id="confirmYesBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ PAGE: HOME ══════ -->
+<div class="page active" id="page-home">
+  <div class="home-hero">
+    <div class="hero-eyebrow" id="heroGreeting">UNLEASH THE BEAST</div>
+    <div class="hero-title">BEAST<br><span>TRACKER</span></div>
+    <div class="hero-date" id="homeDate"></div>
+    <div class="hero-monster">M</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="val" id="streakVal">0</div><div class="lbl">🔥 Streak</div></div>
+    <div class="stat-box"><div class="val" id="weekWorkouts">0</div><div class="lbl">⚡ This Week</div></div>
+    <div class="stat-box"><div class="val" id="totalWorkouts">0</div><div class="lbl">💀 Total</div></div>
+  </div>
+
+  <div class="page-body">
+    <div id="todayBanner"></div>
+    <div class="section-title">Weekly Schedule</div>
+    <div id="weekCards"></div>
+  </div>
+</div>
+
+<!-- ══════ PAGE: WORKOUT ══════ -->
+<div class="page" id="page-workout">
+  <div id="workoutHero"></div>
+  <div style="height:10px"></div>
+  <div id="workoutContent"></div>
+</div>
+
+<!-- ══════ PAGE: PROGRESS ══════ -->
+<div class="page" id="page-progress">
+  <div class="page-header">
+    <h1>Progress 📈</h1>
+    <p>Track your strength gains</p>
+  </div>
+  <div class="page-body" style="padding-top:16px">
+    <div class="section-title">Check-in Calendar</div>
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <h3 id="calTitle"></h3>
+        <button class="cal-nav" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><div class="legend-dot"></div> Trained</span>
+        <span><div class="legend-dot today"></div> Today</span>
+      </div>
+    </div>
+
+    <div class="section-title">Strength Chart</div>
+    <select class="exercise-select" id="progressExSelect" onchange="renderProgressChart()">
+      <option value="">— SELECT EXERCISE —</option>
+    </select>
+    <div id="progressChartArea">
+      <div class="empty-state"><div class="icon">💀</div><p>Select exercise to view chart</p></div>
+    </div>
+
+    <div class="section-title">Session History</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- ══════ PAGE: MEASUREMENTS ══════ -->
+<div class="page" id="page-meas">
+  <div class="page-header">
+    <h1>Body Stats 📏</h1>
+    <p>Track your physique</p>
+  </div>
+  <div class="page-body" style="padding-top:16px">
+    <div class="card">
+      <div class="section-title" style="margin-top:0">Today's Stats</div>
+      <div class="meas-row"><div class="meas-label">⚖️ Weight</div><input class="meas-input" type="number" id="m-weight" placeholder="75" step="0.1"><div class="meas-unit">kg</div></div>
+      <div class="meas-row"><div class="meas-label">💪 Chest</div><input class="meas-input" type="number" id="m-chest" placeholder="100" step="0.1"><div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🦾 Arm</div><input class="meas-input" type="number" id="m-arm" placeholder="38" step="0.1"><div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🔩 Waist</div><input class="meas-input" type="number" id="m-waist" placeholder="80" step="0.1"><div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🦵 Thigh</div><input class="meas-input" type="number" id="m-thigh" placeholder="58" step="0.1"><div class="meas-unit">cm</div></div>
+      <div class="meas-row"><div class="meas-label">🦴 Shoulder</div><input class="meas-input" type="number" id="m-shoulder" placeholder="120" step="0.1"><div class="meas-unit">cm</div></div>
+      <button class="btn-primary" style="margin-top:8px" onclick="saveMeasurements()">SAVE STATS</button>
+    </div>
+    <div class="section-title">Stats History</div>
+    <div id="measHistory"></div>
+  </div>
+</div>
+
+<!-- ══════ BOTTOM NAV ══════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchPage('home',this)">
+    <span class="icon">💀</span>Home
+  </button>
+  <button class="nav-btn" onclick="switchPage('progress',this)">
+    <span class="icon">⚡</span>Progress
+  </button>
+  <button class="nav-btn" onclick="switchPage('meas',this)">
+    <span class="icon">🔩</span>Body Stats
+  </button>
+</nav>
+
+<script>
+// ══════════════════════════════════════════
+// WORKOUT DATA — 5-Day PPL Split
+// ══════════════════════════════════════════
+const WORKOUT_DAYS = {
+  2: {
+    name:'MON', title:'Chest & Triceps', subtitle:'Push Day A',
+    duration:'~75 min', goal:'Build chest mass & tricep size',
+    icon:'💪', color:'#89d400',
+    exercises:[
+      {name:'Warmup Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Xoay khớp vai, cổ tay. Chuẩn bị hệ thần kinh cho buổi push.'},
+      {name:'Barbell Bench Press',sets:5,reps:'5',rest:180,muscle:'Chest, Front Delt, Tricep',icon:'🏋️',
+       tips:'Compound movement – bài chủ đạo. Hạ bar đến ngực nhẹ, đẩy thẳng lên. Siết xương bả vai trước khi nằm xuống. Chân đạp đất mạnh. Tăng tạ mỗi tuần (progressive overload).'},
+      {name:'Incline DB Press',sets:4,reps:'8–10',rest:90,muscle:'Upper Chest, Front Delt',icon:'📐',
+       tips:'Góc 30–45°. Kích thích ngực trên – tạo khối cơ đầy đặn. Hạ tạ chậm 3 giây, đẩy lên nhanh và mạnh. Siết ngực ở đỉnh.'},
+      {name:'Cable Chest Fly',sets:3,reps:'12–15',rest:60,muscle:'Chest (isolation)',icon:'🔗',
+       tips:'Isolation – căng cơ ngực tối đa. Giữ khuỷu tay hơi cong. Cảm nhận stretch ở ngực khi tay ra. Siết chặt ở điểm chụm lại – giữ 1 giây.'},
+      {name:'Dip (Weighted)',sets:4,reps:'8–10',rest:90,muscle:'Lower Chest, Tricep',icon:'⬇️',
+       tips:'Nghiêng người về phía trước để hit ngực nhiều hơn. Hạ xuống đến khi cánh tay song song mặt đất. Nếu quá dễ – thêm tạ. Tuyệt vời để phát triển lower chest.'},
+      {name:'Skull Crusher',sets:3,reps:'10–12',rest:60,muscle:'Tricep Long Head',icon:'💀',
+       tips:'Nằm ghế, hạ tạ về phía trán chậm rãi. Chỉ gập khuỷu tay, giữ bắp tay thẳng đứng. Kết hợp với Close-Grip Press ở set cuối để pumping tối đa.'},
+      {name:'Tricep Pushdown',sets:3,reps:'12–15',rest:60,muscle:'Tricep (all heads)',icon:'↓',
+       tips:'Kéo dây xuống đến thẳng hoàn toàn, siết tricep mạnh ở cuối. Khuỷu tay sát hông – KHÔNG để khuỷu tay banh ra. Thực hiện chậm và có kiểm soát.'},
+      {name:'Cooldown Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Giảm nhịp tim. Kéo giãn ngực bằng cách đưa tay ra sau, kéo giãn tricep trên đầu.'}
+    ]
+  },
+  3: {
+    name:'TUE', title:'Back & Biceps', subtitle:'Pull Day A',
+    duration:'~75 min', goal:'Build V-taper & arm thickness',
+    icon:'🦾', color:'#89d400',
+    exercises:[
+      {name:'Warmup Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Xoay vai vòng tròn. Kéo giãn vai và cổ trước khi pull.'},
+      {name:'Deadlift',sets:4,reps:'5',rest:180,muscle:'Full Back, Hamstring, Glutes',icon:'💀',
+       tips:'King of all exercises. Lưng thẳng TUYỆT ĐỐI. Đẩy sàn xuống – không phải kéo tạ lên. Hít thở sâu và giữ trước khi kéo. Tăng tạ mỗi tuần là mục tiêu.'},
+      {name:'Pull-up / Lat Pulldown',sets:4,reps:'8–10',rest:90,muscle:'Lats, Bicep',icon:'⬆️',
+       tips:'Pull-up: tốt nhất để tạo lưng rộng. Kéo khuỷu tay xuống và vào người – tưởng tượng bẻ cong thanh bar. Nếu chưa làm được pull-up: dùng Lat Pulldown.'},
+      {name:'Barbell Row',sets:4,reps:'6–8',rest:90,muscle:'Mid Back, Lats, Rear Delt',icon:'🏋️',
+       tips:'Cúi người 45°, lưng thẳng. Kéo bar về phía rốn – không phải ngực. Siết bả vai lại ở điểm cao nhất. Hạ xuống chậm 2 giây. Bài compound quan trọng nhất cho lưng dày.'},
+      {name:'Seated Cable Row',sets:3,reps:'10–12',rest:60,muscle:'Mid Back, Rhomboids',icon:'🚣',
+       tips:'Siết bả vai lại khi kéo vào. Người giữ thẳng – không lắc lư. Pause 1 giây ở điểm kéo vào để tối đa hóa co cơ.'},
+      {name:'Face Pull',sets:3,reps:'15',rest:45,muscle:'Rear Delt, Rotator Cuff',icon:'🎯',
+       tips:'Quan trọng cho sức khỏe vai. Kéo về phía mặt, cùi chỏ cao hơn vai. Xoay tay ra ngoài ở điểm kéo vào. Tập nhẹ – đây là bài phục hồi vai.'},
+      {name:'Barbell Curl',sets:3,reps:'8–10',rest:60,muscle:'Bicep',icon:'💪',
+       tips:'Tay sát hông. Chỉ gập cùi chỏ – KHÔNG swing người. Siết bicep mạnh ở đỉnh. Hạ xuống chậm 3 giây (eccentric) – đây là lúc cơ phát triển.'},
+      {name:'Hammer Curl',sets:3,reps:'10–12',rest:60,muscle:'Bicep, Brachialis',icon:'🔨',
+       tips:'Tư thế tay như đang cầm búa. Phát triển brachialis – cơ bên dưới bicep, giúp cánh tay trông to hơn. Kết hợp tốt với Barbell Curl.'},
+      {name:'Cooldown Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Giảm nhịp tim. Kéo giãn lưng bằng cách treo người lên xà.'}
+    ]
+  },
+  4: {
+    name:'WED', title:'Legs', subtitle:'Leg Day',
+    duration:'~80 min', goal:'Build powerful legs & glutes',
+    icon:'🦵', color:'#89d400',
+    exercises:[
+      {name:'Warmup Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h, bước dài, nâng gối cao. Làm ấm hông và gối. KHÔNG bỏ qua warmup ngày chân.'},
+      {name:'Barbell Squat',sets:5,reps:'5',rest:180,muscle:'Quads, Glutes, Hamstrings',icon:'🏋️',
+       tips:'King of leg exercises. Chân rộng bằng vai. Hạ xuống dưới parallel (đùi song song mặt đất). Gối theo hướng mũi chân. Siết core và lưng thẳng. Đẩy từ gót chân khi đứng lên.'},
+      {name:'Romanian Deadlift',sets:4,reps:'8–10',rest:90,muscle:'Hamstrings, Glutes',icon:'💀',
+       tips:'Giữ tạ sát thân người. Đẩy hông ra sau – không cúi lưng. Cảm nhận stretch cơ đùi sau tối đa. Lưng luôn thẳng, ngực ưỡn ra trước.'},
+      {name:'Leg Press',sets:4,reps:'10–12',rest:90,muscle:'Quads, Glutes',icon:'⬇️',
+       tips:'Đặt chân trung bình hoặc cao. Hạ xuống đến 90° – không để lưng rời khỏi ghế. Không khóa gối ở trên cùng. Volume cao, cảm nhận pump.'},
+      {name:'Leg Curl',sets:4,reps:'10–12',rest:60,muscle:'Hamstrings',icon:'🔄',
+       tips:'Cuộn chân vào chậm rãi và có kiểm soát. Siết hamstring ở đỉnh và giữ 1 giây. Đừng để hông nhấc khỏi máy. Bài quan trọng để cân bằng đùi trước/sau.'},
+      {name:'Walking Lunge',sets:3,reps:'12 bước/bên',rest:60,muscle:'Quads, Glutes',icon:'🚶',
+       tips:'Bước dài, hạ gối sau xuống gần chạm sàn. Người thẳng đứng. Bài tốt cho balance và unilateral strength. Dùng tạ khi đã quen kỹ thuật.'},
+      {name:'Calf Raise',sets:4,reps:'15–20',rest:45,muscle:'Calves',icon:'🦶',
+       tips:'Đứng trên bậc thang. Nâng lên cao nhất và giữ 1 giây, hạ xuống thấp nhất và giữ 1 giây. Calves cần volume cao. Có thể tập 1 chân để tăng khó.'},
+      {name:'Cooldown Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Kéo giãn đùi trước, đùi sau, hông. Mỗi tư thế giữ 30 giây. Ngày chân quan trọng nhất – phục hồi tốt.'}
+    ]
+  },
+  5: {
+    name:'THU', title:'Shoulders & Arms', subtitle:'Push Day B',
+    duration:'~70 min', goal:'Boulder shoulders & massive arms',
+    icon:'⚡', color:'#89d400',
+    exercises:[
+      {name:'Warmup Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Xoay vai nhiều vòng. Bài tập vai cần khởi động kỹ để tránh chấn thương.'},
+      {name:'Overhead Press (OHP)',sets:5,reps:'5',rest:180,muscle:'All Deltoids, Tricep',icon:'🏋️',
+       tips:'Bài compound chủ lực cho vai. Đẩy bar thẳng lên qua đầu. Core siết chặt để tránh ưỡn lưng. Tăng tạ mỗi tuần. Đây là bài test sức mạnh vai thật sự.'},
+      {name:'DB Lateral Raise',sets:4,reps:'12–15',rest:60,muscle:'Side Delt',icon:'↕️',
+       tips:'Bài quan trọng nhất cho vai tròn to. Nâng đến ngang vai – không cao hơn. Cổ tay thấp hơn khuỷu tay. Tốc độ chậm, cảm nhận side delt co lại. Dùng tạ nhẹ.'},
+      {name:'DB Front Raise',sets:3,reps:'12',rest:60,muscle:'Front Delt',icon:'⬆️',
+       tips:'Nâng tạ thẳng ra trước đến ngang vai. Không swing người. Front delt thường đã được tập nhiều qua bench press nên không cần quá nhiều volume.'},
+      {name:'Rear Delt Fly',sets:4,reps:'15',rest:45,muscle:'Rear Delt',icon:'🦅',
+       tips:'Cúi người 45°, giơ tạ ra hai bên – giống đang vỗ cánh. Rear delt thường yếu nhất – cần tập nhiều để vai trông cân đối khi nhìn từ sau.'},
+      {name:'Arnold Press',sets:3,reps:'10–12',rest:60,muscle:'All 3 Delt Heads',icon:'🌀',
+       tips:'Bắt đầu lòng bàn tay vào mặt, xoay ra ngoài khi đẩy lên. Kích thích cả 3 đầu vai trong 1 bài. Thực hiện chậm và kiểm soát.'},
+      {name:'EZ Bar Curl',sets:3,reps:'10–12',rest:60,muscle:'Bicep',icon:'💪',
+       tips:'EZ bar giảm áp lực cổ tay. Kỹ thuật như Barbell Curl. Siết bicep mạnh ở đỉnh và hạ chậm.'},
+      {name:'Rope Pushdown',sets:3,reps:'12–15',rest:60,muscle:'Tricep',icon:'↓',
+       tips:'Tách dây ra ở cuối để kích thích lateral head. Siết tricep tối đa ở dưới cùng. Khuỷu tay sát hông suốt bài.'},
+      {name:'Cooldown Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Kéo giãn vai sau, tricep và bicep. Xoay vai nhẹ nhàng để giảm tension.'}
+    ]
+  },
+  6: {
+    name:'FRI', title:'Back & Chest', subtitle:'Pull Day B',
+    duration:'~70 min', goal:'Full upper body strength & density',
+    icon:'🔥', color:'#89d400',
+    exercises:[
+      {name:'Warmup Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'5 km/h. Kết thúc tuần tập – warmup kỹ vì người đang mệt tích lũy.'},
+      {name:'Weighted Pull-up',sets:4,reps:'6–8',rest:120,muscle:'Lats, Bicep',icon:'⬆️',
+       tips:'Thêm tạ khi đã làm được 10+ reps. Kéo đến khi cằm qua thanh xà. Hạ xuống chậm 3 giây. Bài tốt nhất cho lưng rộng.'},
+      {name:'Incline Barbell Press',sets:4,reps:'6–8',rest:120,muscle:'Upper Chest',icon:'📐',
+       tips:'Tập trung phát triển ngực trên – tạo khối cơ dày. Ghế 30°. Đẩy nhanh, hạ chậm.'},
+      {name:'T-Bar Row',sets:4,reps:'8–10',rest:90,muscle:'Mid Back, Lats',icon:'🔩',
+       tips:'Bài tốt để tạo độ dày cho lưng giữa. Siết bả vai ở điểm kéo vào. Người giữ ổn định, không lắc lư.'},
+      {name:'DB Chest Press',sets:3,reps:'10–12',rest:75,muscle:'Chest, Tricep',icon:'🏋️',
+       tips:'Biên độ chuyển động lớn hơn Barbell. Chụm tạ nhẹ ở trên để hit ngực trong. Hạ tạ đến khi cảm nhận stretch ngực tối đa.'},
+      {name:'Cable Row (Wide Grip)',sets:3,reps:'12',rest:60,muscle:'Upper Back, Rear Delt',icon:'🔗',
+       tips:'Kéo về phía ngực thay vì bụng. Khuỷu tay xòe rộng ra ngoài. Hit lưng trên và rear delt.'},
+      {name:'Pec Deck Fly',sets:3,reps:'15',rest:45,muscle:'Chest (isolation)',icon:'🎯',
+       tips:'Bài finishing cho ngực. Cảm nhận stretch sâu ở ngực khi mở ra. Siết chặt ở điểm chụm lại – không dùng momentum.'},
+      {name:'Cooldown Walk',sets:1,reps:'10 phút',rest:0,muscle:'Toàn thân',type:'walk',
+       tips:'Kết thúc tuần tập! Kéo giãn toàn thân. Bạn đã hoàn thành 5 buổi trong tuần – outstanding! 💪'}
+    ]
+  },
+  7: {name:'SAT',title:'Rest & Recover',subtitle:'Active Recovery',duration:'',goal:'',icon:'⚡',rest:true},
+  1: {name:'SUN',title:'Rest & Recover',subtitle:'Full Rest',duration:'',goal:'',icon:'💤',rest:true}
+};
+
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+const load = (k,d) => { try{return JSON.parse(localStorage.getItem('beast_'+k))??d}catch{return d} };
+const save = (k,v) => localStorage.setItem('beast_'+k, JSON.stringify(v));
+
+let completedDays = load('completedDays',{});
+let workoutLogs   = load('workoutLogs',[]);
+let measurements  = load('measurements',[]);
+let currentWorkoutDay = null;
+let currentLog = null;
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+let timerInterval=null, timerTotal=0, timerRemaining=0;
+const CIRC = 2*Math.PI*90;
+
+function startTimer(sec, exName){
+  if(timerInterval) clearInterval(timerInterval);
+  timerTotal = timerRemaining = sec;
+  document.getElementById('timerExName').textContent = 'REST — '+exName.toUpperCase();
+  document.getElementById('timerOverlay').classList.add('show');
+  drawTimer();
+  timerInterval = setInterval(()=>{
+    timerRemaining--;
+    drawTimer();
+    if(timerRemaining<=0){
+      clearInterval(timerInterval); timerInterval=null;
+      document.getElementById('timerOverlay').classList.remove('show');
+      if('vibrate' in navigator) navigator.vibrate([200,100,200]);
+    }
+  },1000);
+}
+function drawTimer(){
+  document.getElementById('timerNum').textContent = timerRemaining;
+  const offset = CIRC*(timerRemaining/timerTotal);
+  document.getElementById('timerRing').style.strokeDashoffset = offset;
+}
+function skipTimer(){ clearInterval(timerInterval); timerInterval=null; document.getElementById('timerOverlay').classList.remove('show'); }
+function addTime(s){ timerRemaining=Math.min(timerRemaining+s,300); timerTotal=Math.max(timerTotal,timerRemaining); drawTimer(); }
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function switchPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='progress'){ renderProgress(); renderCalendar(); }
+  if(id==='meas') renderMeasHistory();
+}
+function goHome(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-home').classList.add('active');
+  document.querySelector('.nav-btn').classList.add('active');
+  renderHome();
+}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+const todayKey = () => new Date().toISOString().slice(0,10);
+function getVNDay(){ const d=new Date().getDay(); return d===0?1:d+1; }
+
+function renderHome(){
+  const dayNum = getVNDay();
+  const now = new Date();
+  const h = now.getHours();
+  const greet = h<5?'NIGHT OWL MODE':h<12?'MORNING WARRIOR':h<17?'AFTERNOON GRIND':'EVENING BEAST';
+  document.getElementById('heroGreeting').textContent = greet;
+  document.getElementById('homeDate').textContent =
+    now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();
+
+  document.getElementById('streakVal').textContent = calcStreak();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-now.getDay()+1); weekStart.setHours(0,0,0,0);
+  let week=0, total=0;
+  for(const k in completedDays){ total++; if(new Date(k+'T00:00:00')>=weekStart) week++; }
+  document.getElementById('weekWorkouts').textContent = week;
+  document.getElementById('totalWorkouts').textContent = total;
+
+  const wd = WORKOUT_DAYS[dayNum];
+  const banner = document.getElementById('todayBanner');
+  if(wd && !wd.rest){
+    const done = completedDays[todayKey()];
+    banner.innerHTML=`<div class="today-banner" onclick="openWorkout(${dayNum})">
+      <div class="tb-tag">TODAY'S SESSION</div>
+      <h2>${wd.title.toUpperCase()}</h2>
+      <p>${wd.subtitle} &nbsp;·&nbsp; ${wd.duration}${done?' &nbsp;·&nbsp; ✅ COMPLETED':''}</p>
+      <div class="tb-arrow">${done?'✓':'›'}</div>
+    </div>`;
+  } else {
+    banner.innerHTML=`<div class="rest-card">
+      <div class="icon">⚡</div>
+      <h3>Rest & Recover</h3>
+      <p>Muscles grow during recovery. Eat. Sleep. Hydrate.</p>
+    </div>`;
+  }
+
+  const container = document.getElementById('weekCards');
+  container.innerHTML=[2,3,4,5,6,7,1].map(d=>{
+    const wd=WORKOUT_DAYS[d]; const isToday=d===dayNum;
+    const done=completedDays[todayKey()]&&isToday;
+    const cls=['day-card',isToday?'today':'',wd.rest?'rest':'',done?'done':''].filter(Boolean).join(' ');
+    const oc=wd.rest?'':`onclick="openWorkout(${d})"`;
+    return `<div class="${cls}" ${oc}>
+      <div class="day-badge"><div class="di">${done?'✓':wd.icon}</div><div style="font-size:9px;margin-top:2px">${wd.name}</div></div>
+      <div class="day-info">
+        <div class="day-label">${wd.name} — ${wd.subtitle}</div>
+        <h3>${wd.title}</h3>
+      </div>
+      <div class="day-meta"><div class="time">${wd.duration}</div><div class="chk">${isToday&&!wd.rest&&!done?'›':''}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function calcStreak(){
+  let streak=0, d=new Date();
+  for(let i=0;i<365;i++){
+    const k=d.toISOString().slice(0,10);
+    const dn=d.getDay()===0?1:d.getDay()+1;
+    if(WORKOUT_DAYS[dn]?.rest){d.setDate(d.getDate()-1);continue;}
+    if(!completedDays[k]) break;
+    streak++; d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// ══════════════════════════════════════════
+// WORKOUT
+// ══════════════════════════════════════════
+function openWorkout(dayNum){
+  currentWorkoutDay = dayNum;
+  const wd = WORKOUT_DAYS[dayNum];
+  const today = todayKey();
+  currentLog = workoutLogs.find(l=>l.date===today&&l.day===dayNum)||{date:today,day:dayNum,sets:{}};
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-workout').classList.add('active');
+
+  document.getElementById('workoutHero').innerHTML=`<div class="workout-hero">
+    <button class="back-btn" onclick="goHome()">← BACK</button>
+    <div style="position:absolute;right:20px;top:40px;font-size:42px;opacity:.07;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#89d400">${wd.icon}</div>
+    <h2>${wd.title.toUpperCase()}</h2>
+    <div class="sub">${wd.subtitle} · ${wd.duration}</div>
+    <div class="goal-tag">${wd.goal}</div>
+  </div>`;
+
+  let html='';
+  wd.exercises.forEach((ex,ei)=>{
+    if(ex.type==='walk'){
+      html+=`<div class="walk-card">
+        <div class="wicon">🚶</div>
+        <div class="winfo"><h4>${ex.name.toUpperCase()}</h4><p>${ex.reps} · ${ex.tips}</p></div>
+      </div>`;
+      return;
+    }
+    const saved=currentLog.sets[ex.name]||[];
+    let setsHtml='';
+    for(let s=0;s<ex.sets;s++){
+      const sv=saved[s]||{};
+      setsHtml+=`<div class="set-row" id="setrow-${ei}-${s}">
+        <div class="set-num${sv.done?' done':''}">${s+1}</div>
+        <input class="set-input" type="number" placeholder="kg" min="0" step="0.5"
+          id="kg-${ei}-${s}" value="${sv.kg||''}" onchange="saveSetData(${ei},${s})">
+        <div class="set-label">KG</div>
+        <input class="set-input" type="number" placeholder="reps" min="0"
+          id="reps-${ei}-${s}" value="${sv.reps||''}" onchange="saveSetData(${ei},${s})">
+        <div class="set-label">REPS</div>
+        <button class="set-done-btn${sv.done?' done':''}" id="donebtn-${ei}-${s}"
+          onclick="completeSet(${ei},${s},${ex.rest},'${ex.name.replace(/'/g,"\\'")}')">
+          ${sv.done?'✓':'○'}
+        </button>
+      </div>`;
+    }
+    html+=`<div class="exercise-card${document.getElementById('expand-'+ei)?.classList.contains('open')?' open':''}" id="excard-${ei}">
+      <div class="exercise-header" onclick="toggleEx(${ei})">
+        <div class="exercise-icon">${ex.icon||'⚡'}</div>
+        <div class="exercise-info">
+          <h4>${ex.name}</h4>
+          <div class="meta">
+            <span class="badge badge-green">${ex.sets}×${ex.reps}</span>
+            <span class="badge badge-dim">${ex.rest}s rest</span>
+            <span class="badge badge-red">${ex.muscle}</span>
+          </div>
+        </div>
+        <div style="color:#444;font-size:20px;margin-left:4px" id="chev-${ei}">›</div>
+      </div>
+      <div class="exercise-expand" id="expand-${ei}">
+        <div class="tips-box">📋 ${ex.tips}</div>
+        ${setsHtml}
+      </div>
+    </div>`;
+  });
+  html+=`<button class="complete-btn" onclick="completeWorkout()">COMPLETE SESSION</button><div style="height:20px"></div>`;
+  document.getElementById('workoutContent').innerHTML=html;
+}
+
+function toggleEx(ei){
+  const exp=document.getElementById('expand-'+ei);
+  const ch=document.getElementById('chev-'+ei);
+  const card=document.getElementById('excard-'+ei);
+  exp.classList.toggle('open');
+  card.classList.toggle('open',exp.classList.contains('open'));
+  ch.textContent=exp.classList.contains('open')?'⌄':'›';
+}
+function saveSetData(ei,si){
+  const ex=WORKOUT_DAYS[currentWorkoutDay]?.exercises[ei];
+  if(!ex||ex.type==='walk') return;
+  const kg=parseFloat(document.getElementById(`kg-${ei}-${si}`)?.value)||null;
+  const reps=parseInt(document.getElementById(`reps-${ei}-${si}`)?.value)||null;
+  if(!currentLog.sets[ex.name]) currentLog.sets[ex.name]=[];
+  if(!currentLog.sets[ex.name][si]) currentLog.sets[ex.name][si]={};
+  Object.assign(currentLog.sets[ex.name][si],{kg,reps}); persistLog();
+}
+function completeSet(ei,si,rest,exName){
+  const ex=WORKOUT_DAYS[currentWorkoutDay]?.exercises[ei];
+  if(!ex) return;
+  const kg=parseFloat(document.getElementById(`kg-${ei}-${si}`)?.value)||null;
+  const reps=parseInt(document.getElementById(`reps-${ei}-${si}`)?.value)||null;
+  if(!currentLog.sets[ex.name]) currentLog.sets[ex.name]=[];
+  if(!currentLog.sets[ex.name][si]) currentLog.sets[ex.name][si]={};
+  Object.assign(currentLog.sets[ex.name][si],{kg,reps,done:true}); persistLog();
+  const btn=document.getElementById(`donebtn-${ei}-${si}`);
+  const num=document.querySelector(`#setrow-${ei}-${si} .set-num`);
+  if(btn){btn.classList.add('done');btn.textContent='✓';}
+  if(num) num.classList.add('done');
+  if(rest>0) startTimer(rest,exName);
+}
+function persistLog(){
+  const idx=workoutLogs.findIndex(l=>l.date===currentLog.date&&l.day===currentLog.day);
+  if(idx>=0) workoutLogs[idx]=currentLog; else workoutLogs.push(currentLog);
+  save('workoutLogs',workoutLogs);
+}
+function completeWorkout(){
+  completedDays[todayKey()]=true; save('completedDays',completedDays); persistLog();
+  const wd=WORKOUT_DAYS[currentWorkoutDay];
+  document.getElementById('doneMsg').textContent=`${wd.title} completed. ${wd.exercises.filter(e=>e.type!=='walk').length} exercises destroyed.`;
+  document.getElementById('doneOverlay').classList.add('show');
+  if('vibrate' in navigator) navigator.vibrate([100,50,100,50,300]);
+}
+function closeDone(){ document.getElementById('doneOverlay').classList.remove('show'); goHome(); }
+
+// ══════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+function renderCalendar(){
+  const title=new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('calTitle').textContent=title;
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const todayStr=new Date().toISOString().slice(0,10);
+  const dows=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const offset=firstDay===0?6:firstDay-1;
+  for(let i=0;i<offset;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let day=1;day<=days;day++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    let cls='cal-day';
+    if(completedDays[ds]) cls+=' worked';
+    if(ds===todayStr) cls+=' today-cal';
+    html+=`<div class="${cls}">${day}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function renderProgress(){
+  const sel=document.getElementById('progressExSelect');
+  const names=new Set();
+  Object.values(WORKOUT_DAYS).forEach(wd=>{if(wd.exercises)wd.exercises.forEach(ex=>{if(ex.type!=='walk')names.add(ex.name);});});
+  sel.innerHTML='<option value="">— SELECT EXERCISE —</option>';
+  [...names].forEach(n=>{sel.innerHTML+=`<option value="${n}">${n.toUpperCase()}</option>`;});
+  renderHistoryList();
+}
+function renderProgressChart(){
+  const exName=document.getElementById('progressExSelect').value;
+  const area=document.getElementById('progressChartArea');
+  if(!exName){area.innerHTML='<div class="empty-state"><div class="icon">💀</div><p>SELECT EXERCISE TO VIEW CHART</p></div>';return;}
+  const pts=[];
+  workoutLogs.forEach(log=>{
+    if(log.sets[exName]){
+      const max=Math.max(...log.sets[exName].filter(s=>s&&s.kg).map(s=>s.kg),0);
+      if(max>0) pts.push({date:log.date,kg:max});
+    }
+  });
+  pts.sort((a,b)=>a.date.localeCompare(b.date));
+  const last8=pts.slice(-8);
+  if(!last8.length){area.innerHTML='<div class="empty-state"><div class="icon">⚡</div><p>NO DATA YET — START LOGGING WEIGHTS</p></div>';return;}
+  const maxKg=Math.max(...last8.map(d=>d.kg));
+  const bars=last8.map(d=>{
+    const h=Math.max(Math.round((d.kg/maxKg)*90),6);
+    return `<div class="bar-col"><div class="bar-val">${d.kg}kg</div><div class="bar" style="height:${h}px"></div><div class="bar-date">${d.date.slice(5)}</div></div>`;
+  }).join('');
+  area.innerHTML=`<div class="progress-chart"><div class="chart-title">${exName.toUpperCase()} — MAX WEIGHT (KG)</div><div class="bar-chart">${bars}</div></div>`;
+}
+function renderHistoryList(){
+  const container=document.getElementById('historyList');
+  if(!workoutLogs.length){container.innerHTML='<div class="empty-state"><div class="icon">💀</div><p>NO SESSIONS LOGGED YET</p></div>';return;}
+  container.innerHTML=[...workoutLogs].reverse().slice(0,30).map((log,i)=>{
+    const wd=WORKOUT_DAYS[log.day];
+    const exCount=Object.keys(log.sets).length;
+    const setCount=Object.values(log.sets).reduce((a,s)=>a+s.filter(x=>x?.done).length,0);
+    const date=new Date(log.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase();
+    const realIdx=workoutLogs.length-1-i;
+    return `<div class="history-item">
+      <div class="history-icon">${wd?.icon||'⚡'}</div>
+      <div class="history-info"><h4>${wd?.title||''}</h4><p>${exCount} exercises · ${setCount} sets completed</p></div>
+      <div class="history-date">${date}</div>
+      <button class="delete-btn" onclick="confirmDelete(${realIdx})">✕</button>
+    </div>`;
+  }).join('');
+}
+let pendingDeleteIdx=null;
+function confirmDelete(idx){
+  pendingDeleteIdx=idx;
+  const log=workoutLogs[idx]; const wd=WORKOUT_DAYS[log?.day];
+  document.getElementById('confirmMsg').textContent=`Delete "${wd?.title||''}" session? This cannot be undone.`;
+  document.getElementById('confirmYesBtn').onclick=doDelete;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function doDelete(){
+  if(pendingDeleteIdx===null) return;
+  const log=workoutLogs[pendingDeleteIdx];
+  workoutLogs.splice(pendingDeleteIdx,1); save('workoutLogs',workoutLogs);
+  if(log&&!workoutLogs.find(l=>l.date===log.date)){delete completedDays[log.date];save('completedDays',completedDays);}
+  closeConfirm(); renderHistoryList(); renderCalendar(); renderProgressChart();
+}
+function closeConfirm(){pendingDeleteIdx=null;document.getElementById('confirmOverlay').classList.remove('show');}
+
+// ══════════════════════════════════════════
+// MEASUREMENTS
+// ══════════════════════════════════════════
+function saveMeasurements(){
+  const m={date:todayKey(),
+    weight:parseFloat(document.getElementById('m-weight').value)||null,
+    chest:parseFloat(document.getElementById('m-chest').value)||null,
+    arm:parseFloat(document.getElementById('m-arm').value)||null,
+    waist:parseFloat(document.getElementById('m-waist').value)||null,
+    thigh:parseFloat(document.getElementById('m-thigh').value)||null,
+    shoulder:parseFloat(document.getElementById('m-shoulder').value)||null,
+  };
+  const idx=measurements.findIndex(x=>x.date===m.date);
+  if(idx>=0)measurements[idx]=m;else measurements.push(m);
+  save('measurements',measurements); renderMeasHistory();
+  const btn=document.querySelector('#page-meas .btn-primary');
+  btn.textContent='✓ SAVED'; setTimeout(()=>btn.textContent='SAVE STATS',1600);
+}
+function renderMeasHistory(){
+  const container=document.getElementById('measHistory');
+  if(!measurements.length){container.innerHTML='<div class="empty-state"><div class="icon">🔩</div><p>NO STATS RECORDED YET</p></div>';return;}
+  container.innerHTML=[...measurements].reverse().slice(0,10).map(m=>{
+    const date=new Date(m.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+    const parts=[];
+    if(m.weight)   parts.push(`⚖️ ${m.weight}kg`);
+    if(m.chest)    parts.push(`💪 Chest ${m.chest}cm`);
+    if(m.arm)      parts.push(`🦾 Arm ${m.arm}cm`);
+    if(m.waist)    parts.push(`🔩 Waist ${m.waist}cm`);
+    if(m.shoulder) parts.push(`🦴 Shoulder ${m.shoulder}cm`);
+    if(m.thigh)    parts.push(`🦵 Thigh ${m.thigh}cm`);
+    return `<div class="card" style="padding:12px 14px">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">${date}</div>
+      <div style="font-size:12px;line-height:2;color:var(--text)">${parts.join(' · ')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// LOCK
+// ══════════════════════════════════════════
+const CORRECT_PIN='24';
+let pinBuffer='';
+function initLock(){
+  if(sessionStorage.getItem('beast_unlocked')==='1'){
+    document.getElementById('lockScreen').classList.add('hidden'); renderHome(); return;
+  }
+}
+function pinPress(d){
+  if(pinBuffer.length>=CORRECT_PIN.length) return;
+  pinBuffer+=d; updatePinDots();
+  if(pinBuffer.length===CORRECT_PIN.length) setTimeout(checkPin,80);
+}
+function pinDelete(){ pinBuffer=pinBuffer.slice(0,-1); updatePinDots(); }
+function updatePinDots(){
+  for(let i=0;i<CORRECT_PIN.length;i++){
+    const dot=document.getElementById('dot'+i);
+    if(dot) dot.classList.toggle('filled',i<pinBuffer.length);
+  }
+}
+function checkPin(){
+  if(pinBuffer===CORRECT_PIN){
+    document.querySelector('.lock-logo').style.color='#fff';
+    document.querySelector('.lock-logo').textContent='ACCESS\nGRANTED';
+    setTimeout(()=>{sessionStorage.setItem('beast_unlocked','1');document.getElementById('lockScreen').classList.add('hidden');renderHome();},500);
+  } else {
+    document.querySelectorAll('.pin-dot').forEach(d=>{d.style.background='#ff2e2e';d.style.borderColor='#ff2e2e';});
+    document.getElementById('lockError').classList.add('show');
+    setTimeout(()=>{
+      document.querySelectorAll('.pin-dot').forEach(d=>{d.style.background='';d.style.borderColor='';d.classList.remove('filled');});
+      document.getElementById('lockError').classList.remove('show');
+      pinBuffer=''; updatePinDots();
+    },900);
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('lockScreen').classList.contains('hidden')) return;
+  if(e.key>='0'&&e.key<='9') pinPress(e.key);
+  if(e.key==='Backspace') pinDelete();
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+initLock();
+</script>
+</body>
+</html>
